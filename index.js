@@ -42,6 +42,22 @@ function updateDisplay() {
             currentTeam1.currentStreak;
         document.getElementById("team2-streak").textContent =
             currentTeam2.currentStreak;
+
+        // if there are no other teams waiting outside, prompt to add more teams
+        // if teams are waiting outside, remove the prompt.
+        if (gameQueue.size() >= 0) {
+            const existingNoMatch = matchDisplay.querySelector(".no-match");
+            if (existingNoMatch) {
+                existingNoMatch.remove();
+            }
+
+            if (gameQueue.size() < 1) {
+                const noMatch = document.createElement("div");
+                noMatch.className = "no-match";
+                noMatch.textContent = "Add more teams to swap out losers";
+                matchDisplay.appendChild(noMatch);
+            }
+        }
     } else {
         document.getElementById("current-match").style.display = "none";
         document.querySelector(".buttons").style.display = "none";
