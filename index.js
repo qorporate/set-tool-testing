@@ -1,6 +1,22 @@
 //#region UTIL
 
 let errorTimeout;
+let currentTeam1 = null;
+let currentTeam2 = null;
+
+const gameQueue = new Queue();
+
+// Initialize the display
+updateDisplay();
+
+// Add enter key support for adding teams
+document
+    .getElementById("new-team-name")
+    .addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            addTeam();
+        }
+    });
 
 function showError(message) {
     const errorDiv = document.getElementById("error-message");
@@ -240,19 +256,3 @@ class Team {
 }
 
 //#endregion
-
-const gameQueue = new Queue();
-let currentTeam1 = null;
-let currentTeam2 = null;
-
-// Initialize the display
-updateDisplay();
-
-// Add enter key support for adding teams
-document
-    .getElementById("new-team-name")
-    .addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
-            addTeam();
-        }
-    });
