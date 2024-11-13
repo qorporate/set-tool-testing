@@ -46,6 +46,11 @@ function updateDisplay() {
         document.getElementById("current-match").style.display = "none";
         document.querySelector(".buttons").style.display = "none";
 
+        const existingNoMatch = matchDisplay.querySelector(".no-match");
+        if (existingNoMatch) {
+            existingNoMatch.remove();
+        }
+
         const noMatch = document.createElement("div");
         noMatch.className = "no-match";
         noMatch.textContent = "Add more teams to start matches";
