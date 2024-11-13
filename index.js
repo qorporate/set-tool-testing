@@ -1,9 +1,17 @@
 //#region UTIL
 
+let errorTimeout;
+
 function showError(message) {
     const errorDiv = document.getElementById("error-message");
     errorDiv.textContent = message;
-    setTimeout(() => {
+
+    // Clear any existing timeout
+    if (errorTimeout) {
+        clearTimeout(errorTimeout);
+    }
+
+    errorTimeout = setTimeout(() => {
         errorDiv.textContent = "";
     }, 3000);
 }
@@ -169,7 +177,6 @@ function handleResult(result) {
 
     setupNextMatch();
 }
-
 //#endregion
 
 //#region CLASSES
