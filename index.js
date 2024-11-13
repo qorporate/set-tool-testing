@@ -150,9 +150,8 @@ function setupNextMatch() {
         // If there's a winner, just get one new challenger
         currentTeam2 = gameQueue.dequeue();
     } else if (!currentTeam1 && gameQueue.size() === 1) {
-        // If only one team is left and no current match
-        currentTeam1 = gameQueue.dequeue();
-        currentTeam2 = null;
+        // only one person is in the queue. we should display them regardless, not dequeue them.
+        console.log("Only one person in queue");
     } else if (!currentTeam1 && gameQueue.size() === 0) {
         // No teams available
         currentTeam1 = null;
