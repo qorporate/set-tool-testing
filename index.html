@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Set Tracker</title>
+        <link rel="stylesheet" href="css/styles.css" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>Set Tracker</h1>
+
+            <div id="match-display">
+                <div class="current-match" id="current-match">
+                    <div class="team" id="team1">
+                        <h2>Team 1</h2>
+                        <p>Wins: <span id="team1-wins">0</span></p>
+                        <p class="streak">
+                            Current Streak: <span id="team1-streak">0</span>
+                        </p>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="team" id="team2">
+                        <h2>Team 2</h2>
+                        <p>Wins: <span id="team2-wins">0</span></p>
+                        <p class="streak">
+                            Current Streak: <span id="team2-streak">0</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button class="win-1" onclick="handleResult('team1')">
+                        Team 1 Win
+                    </button>
+                    <button
+                        class="draw"
+                        onclick="handleResult('draw')"
+                        id="draw-button"
+                    >
+                        Draw
+                    </button>
+                    <button class="win-2" onclick="handleResult('team2')">
+                        Team 2 Win
+                    </button>
+                </div>
+            </div>
+
+            <div class="queue-display">
+                <h2>
+                    Waiting Teams
+                    <span class="waiting-count" id="waiting-count"></span>
+                </h2>
+                <ul class="queue-list" id="queue-list"></ul>
+            </div>
+
+            <div class="team-management">
+                <h2>Team Management</h2>
+                <div class="team-input">
+                    <input
+                        type="text"
+                        id="new-team-name"
+                        placeholder="Enter team name"
+                    />
+                    <button class="add-team" onclick="addTeam()">
+                        Add Team
+                    </button>
+                </div>
+                <div id="error-message" class="error-message"></div>
+            </div>
+        </div>
+        <script src="./index.js"></script>
+    </body>
+</html>
