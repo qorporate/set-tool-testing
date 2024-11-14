@@ -11,6 +11,5 @@ If you'd rather not use the extension, you can open the index.html file in the b
 ## Usage
 
 1. Open the index.html file in the browser.
-2. Add teams to the set.
-3. Click the "Generate Set" button to generate a set of matches.
-4. Click the "Reset" button to reset the set.
+2. Add teams.
+3. Refresh the page to reset.
