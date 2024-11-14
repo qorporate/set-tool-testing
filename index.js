@@ -292,8 +292,4 @@ class GameManager {
     }
 }
 
-// todo:
-// i am working on a version that doesn't move the B team to team A when they win a game. I don't like it. It's hard to know who's who when they suddenly switch places.
-// I am considering using states to track who won, and which team slot needs filling.
-
 const game = new GameManager();
