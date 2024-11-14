@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="buttons">
-                    <button class="win-1" onclick="handleResult('team1')">
+                    <button class="win-1" onclick="game.handleResult('team1')">
                         Team 1 Win
                     </button>
                     <button
@@ -40,7 +40,7 @@
                     >
                         Draw
                     </button>
-                    <button class="win-2" onclick="handleResult('team2')">
+                    <button class="win-2" onclick="game.handleResult('team2')">
                         Team 2 Win
                     </button>
                 </div>
@@ -62,7 +62,7 @@
                         id="new-team-name"
                         placeholder="Enter team name"
                     />
-                    <button class="add-team" onclick="addTeam()">
+                    <button class="add-team" onclick="game.addTeam()">
                         Add Team
                     </button>
                 </div>
