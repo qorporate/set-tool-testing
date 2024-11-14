@@ -152,10 +152,7 @@ class GameManager {
             this.queue.enqueue(this.slotA.team);
             this.slotA.clear();
 
-            this.slotB.team.position = "A"; // Move to slot A
-            this.slotA.setTeam(this.slotB.team);
-            this.slotB.clear();
-
+            // winner stays in their slot. no swap.
             this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
         } else if (result === "draw") {
             this.slotA.team.currentStreak = 0;
@@ -268,7 +265,14 @@ class GameManager {
 
             case GameState.WINNER_NEEDS_CHALLENGER:
                 if (this.queue.size() >= 1) {
-                    this.slotB.setTeam(this.queue.dequeue());
+                    // Check which slot has the winner
+                    if (!this.slotA.isEmpty()) {
+                        // Winner in A, fill B
+                        this.slotB.setTeam(this.queue.dequeue());
+                    } else {
+                        // Winner in B, fill A
+                        this.slotA.setTeam(this.queue.dequeue());
+                    }
                     this.currentState = GameState.MATCH_IN_PROGRESS;
                 }
                 break;
