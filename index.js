@@ -36,12 +36,38 @@ class Team {
     }
 }
 
+class GameState {
+    static WAITING_FOR_TEAMS = "WAITING_FOR_TEAMS";
+    static MATCH_IN_PROGRESS = "MATCH_IN_PROGRESS";
+    static WINNER_NEEDS_CHALLENGER = "WINNER_NEEDS_CHALLENGER";
+}
+
+class MatchSlot {
+    constructor(position) {
+        this.position = position; // 'A' or 'B'
+        this.team = null;
+    }
+
+    setTeam(team) {
+        this.team = team;
+    }
+
+    clear() {
+        this.team = null;
+    }
+
+    isEmpty() {
+        return this.team === null;
+    }
+}
+
 class GameManager {
     constructor() {
-        this.currentTeam1 = null;
-        this.currentTeam2 = null;
+        this.slotA = new MatchSlot("A");
+        this.slotB = new MatchSlot("B");
         this.queue = new Queue();
         this.errorTimeout = null;
+        this.currentState = GameState.WAITING_FOR_TEAMS;
 
         this.initializeEventListeners();
         this.updateDisplay();
@@ -105,35 +131,47 @@ class GameManager {
     }
 
     handleResult(result) {
-        if (!this.currentTeam1 || !this.currentTeam2) {
+        if (this.slotA.isEmpty() || this.slotB.isEmpty()) {
             return;
         }
 
         if (result === "team1") {
-            this.currentTeam1.wins++;
-            this.currentTeam1.currentStreak++;
-            this.currentTeam2.currentStreak = 0;
-            this.queue.enqueue(this.currentTeam2);
-            this.currentTeam2 = null;
+            this.slotA.team.wins++;
+            this.slotA.team.currentStreak++;
+
+            this.slotB.team.currentStreak = 0;
+            this.queue.enqueue(this.slotB.team);
+            this.slotB.clear();
+
+            this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
         } else if (result === "team2") {
-            this.currentTeam2.wins++;
-            this.currentTeam2.currentStreak++;
-            this.currentTeam1.currentStreak = 0;
-            this.queue.enqueue(this.currentTeam1);
-            this.currentTeam1 = this.currentTeam2;
-            this.currentTeam2 = null;
+            this.slotB.team.wins++;
+            this.slotB.team.currentStreak++;
+
+            this.slotA.team.currentStreak = 0;
+            this.queue.enqueue(this.slotA.team);
+            this.slotA.clear();
+
+            this.slotB.team.position = "A"; // Move to slot A
+            this.slotA.setTeam(this.slotB.team);
+            this.slotB.clear();
+
+            this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
         } else if (result === "draw") {
-            this.currentTeam1.currentStreak = 0;
-            this.currentTeam2.currentStreak = 0;
-            if (this.currentTeam1.wins <= this.currentTeam2.wins) {
-                this.queue.enqueue(this.currentTeam1);
-                this.queue.enqueue(this.currentTeam2);
+            this.slotA.team.currentStreak = 0;
+            this.slotB.team.currentStreak = 0;
+
+            if (this.slotA.team.wins <= this.slotB.team.wins) {
+                this.queue.enqueue(this.slotA.team);
+                this.queue.enqueue(this.slotB.team);
             } else {
-                this.queue.enqueue(this.currentTeam2);
-                this.queue.enqueue(this.currentTeam1);
+                this.queue.enqueue(this.slotB.team);
+                this.queue.enqueue(this.slotA.team);
             }
-            this.currentTeam1 = null;
-            this.currentTeam2 = null;
+
+            this.slotA.clear();
+            this.slotB.clear();
+            this.currentState = GameState.WAITING_FOR_TEAMS;
         }
 
         this.setupNextMatch();
@@ -152,46 +190,40 @@ class GameManager {
     updateDisplay() {
         const matchDisplay = document.getElementById("match-display");
 
-        if (this.currentTeam1 && this.currentTeam2) {
+        if (!this.slotA.isEmpty() && !this.slotB.isEmpty()) {
             document.getElementById("current-match").style.display = "flex";
             document.querySelector(".buttons").style.display = "flex";
 
             document.getElementById("team1").querySelector("h2").textContent =
-                this.currentTeam1.name;
+                this.slotA.team.name;
             document.getElementById("team1-wins").textContent =
-                this.currentTeam1.wins;
+                this.slotA.team.wins;
             document.getElementById("team1-streak").textContent =
-                this.currentTeam1.currentStreak;
+                this.slotA.team.currentStreak;
 
             document.getElementById("team2").querySelector("h2").textContent =
-                this.currentTeam2.name;
+                this.slotB.team.name;
             document.getElementById("team2-wins").textContent =
-                this.currentTeam2.wins;
+                this.slotB.team.wins;
             document.getElementById("team2-streak").textContent =
-                this.currentTeam2.currentStreak;
+                this.slotB.team.currentStreak;
 
-            // if there are no other teams waiting outside, prompt to add more teams
-            // if teams are waiting outside, remove the prompt.
-            if (this.queue.size() >= 0) {
-                const existingNoMatch = matchDisplay.querySelector(".no-match");
-                if (existingNoMatch) {
-                    existingNoMatch.remove();
-                }
+            // Update no-match message based on queue size
+            const existingNoMatch = matchDisplay.querySelector(".no-match");
+            if (existingNoMatch) {
+                existingNoMatch.remove();
+            }
 
-                if (this.queue.size() < 1) {
-                    const noMatch = document.createElement("div");
-                    noMatch.className = "no-match";
-                    noMatch.textContent = "Add more teams to swap out losers";
-                    matchDisplay.appendChild(noMatch);
-                }
+            if (this.queue.size() < 1) {
+                const noMatch = document.createElement("div");
+                noMatch.className = "no-match";
+                noMatch.textContent = "Add more teams to swap out losers";
+                matchDisplay.appendChild(noMatch);
             }
         } else {
-            // we don't need to show the match display if there's no match happening.
             document.getElementById("current-match").style.display = "none";
             document.querySelector(".buttons").style.display = "none";
 
-            // and if there's no match happening, we should show the "add more teams" message.
-            // but to avoid duplicating the message, we should remove any existing one first.
             const existingNoMatch = matchDisplay.querySelector(".no-match");
             if (existingNoMatch) {
                 existingNoMatch.remove();
@@ -225,20 +257,21 @@ class GameManager {
     }
 
     setupNextMatch() {
-        if (!this.currentTeam1 && this.queue.size() >= 2) {
-            // If no current winner, get two new teams
-            this.currentTeam1 = this.queue.dequeue();
-            this.currentTeam2 = this.queue.dequeue();
-        } else if (this.currentTeam1 && this.queue.size() >= 1) {
-            // If there's a winner, just get one new challenger
-            this.currentTeam2 = this.queue.dequeue();
-        } else if (!this.currentTeam1 && this.queue.size() === 1) {
-            // only one person is in the queue. we should not dequeue them, or they won't show on the waiting list.
-            console.log("Only one person in queue");
-        } else if (!this.currentTeam1 && this.queue.size() === 0) {
-            // No teams available
-            this.currentTeam1 = null;
-            this.currentTeam2 = null;
+        switch (this.currentState) {
+            case GameState.WAITING_FOR_TEAMS:
+                if (this.queue.size() >= 2) {
+                    this.slotA.setTeam(this.queue.dequeue());
+                    this.slotB.setTeam(this.queue.dequeue());
+                    this.currentState = GameState.MATCH_IN_PROGRESS;
+                }
+                break;
+
+            case GameState.WINNER_NEEDS_CHALLENGER:
+                if (this.queue.size() >= 1) {
+                    this.slotB.setTeam(this.queue.dequeue());
+                    this.currentState = GameState.MATCH_IN_PROGRESS;
+                }
+                break;
         }
 
         this.updateDisplay();
