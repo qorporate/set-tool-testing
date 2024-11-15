@@ -164,3 +164,20 @@ input[type="text"] {
 .move-button:disabled {
     background-color: #ccc;
 }
+
+.edit-team {
+    background-color: #2196f3;
+    color: white;
+    padding: 5px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+}
+
+.edit-team svg {
+    width: 20px;
+    height: 20px;
+}

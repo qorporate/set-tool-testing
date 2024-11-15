@@ -158,6 +158,42 @@ class GameManager {
         this.updateDisplay();
     }
 
+    editTeamName(oldName) {
+        const newName = prompt("Enter new team name:", oldName)
+            ?.trim()
+            .toUpperCase();
+
+        if (!newName || newName === oldName) {
+            return;
+        }
+
+        // Check if new name already exists
+        if (
+            this.queue.items.some((team) => team.name === newName) ||
+            this.slotA.team?.name === newName ||
+            this.slotB.team?.name === newName
+        ) {
+            this.showError("Team name already exists");
+            return;
+        }
+
+        // Update name in queue
+        const team = this.queue.items.find((team) => team.name === oldName);
+        if (team) {
+            team.name = newName;
+        }
+
+        // Update name in slots if necessary
+        if (this.slotA.team?.name === oldName) {
+            this.slotA.team.name = newName;
+        }
+        if (this.slotB.team?.name === oldName) {
+            this.slotB.team.name = newName;
+        }
+
+        this.updateDisplay();
+    }
+
     handleResult(result) {
         if (this.slotA.isEmpty() || this.slotB.isEmpty()) {
             return;
@@ -267,7 +303,7 @@ class GameManager {
             const li = document.createElement("li");
             li.className = "queue-item";
             li.innerHTML = `
-                <span>${team.name} (Total Wins: ${team.wins})</span>
+                <span>${team.name} (Wins: ${team.wins})</span>
                 <div class="queue-item-buttons">
                 <button class="move-button" onclick="game.moveTeamUp('${
                     team.name
@@ -278,6 +314,11 @@ class GameManager {
                 team.name
             }')" ${index === this.queue.items.length - 1 ? "disabled" : ""}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <button class="edit-team" onclick="game.editTeamName('${
+                team.name
+            }')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
             </button>
                     <button class="remove-team" onclick="game.removeTeam('${
                         team.name
