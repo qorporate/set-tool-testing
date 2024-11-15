@@ -148,3 +148,19 @@ input[type="text"] {
     color: #666;
     margin-left: 10px;
 }
+
+.queue-item-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.move-button {
+    background-color: #607d8b;
+    color: white;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.move-button:disabled {
+    background-color: #ccc;
+}

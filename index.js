@@ -26,6 +26,24 @@ class Queue {
     remove(teamName) {
         this.items = this.items.filter((team) => team.name !== teamName);
     }
+
+    moveUp(teamName) {
+        const index = this.items.findIndex((team) => team.name === teamName);
+        if (index > 0) {
+            const temp = this.items[index];
+            this.items[index] = this.items[index - 1];
+            this.items[index - 1] = temp;
+        }
+    }
+
+    moveDown(teamName) {
+        const index = this.items.findIndex((team) => team.name === teamName);
+        if (index < this.items.length - 1) {
+            const temp = this.items[index];
+            this.items[index] = this.items[index + 1];
+            this.items[index + 1] = temp;
+        }
+    }
 }
 
 class Team {
@@ -127,6 +145,16 @@ class GameManager {
         }
 
         this.queue.remove(teamName);
+        this.updateDisplay();
+    }
+
+    moveTeamUp(teamName) {
+        this.queue.moveUp(teamName);
+        this.updateDisplay();
+    }
+
+    moveTeamDown(teamName) {
+        this.queue.moveDown(teamName);
         this.updateDisplay();
     }
 
@@ -235,13 +263,27 @@ class GameManager {
         // Update queue display
         const queueList = document.getElementById("queue-list");
         queueList.innerHTML = "";
-        this.queue.items.forEach((team) => {
+        this.queue.items.forEach((team, index) => {
             const li = document.createElement("li");
             li.className = "queue-item";
             li.innerHTML = `
-                    <span>${team.name} (Total Wins: ${team.wins})</span>
-                    <button class="remove-team" onclick="game.removeTeam('${team.name}')">Remove</button>
-                `;
+                <span>${team.name} (Total Wins: ${team.wins})</span>
+                <div class="queue-item-buttons">
+                <button class="move-button" onclick="game.moveTeamUp('${
+                    team.name
+                }')" ${index === 0 ? "disabled" : ""}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up"><path d="m18 15-6-6-6 6"/></svg>
+            </button>
+            <button class="move-button" onclick="game.moveTeamDown('${
+                team.name
+            }')" ${index === this.queue.items.length - 1 ? "disabled" : ""}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+                    <button class="remove-team" onclick="game.removeTeam('${
+                        team.name
+                    }')">Remove</button>
+                </div>
+            `;
             queueList.appendChild(li);
         });
 
