@@ -106,7 +106,7 @@ class GameManager {
 
     addTeam() {
         const input = document.getElementById("new-team-name");
-        const teamName = input.value.trim();
+        const teamName = input.value.trim().toUpperCase();
 
         if (!teamName) {
             this.showError("Please enter a team name");
