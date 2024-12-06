@@ -309,6 +309,14 @@ class GameManager {
             document.getElementById("team2-streak").textContent =
                 this.slotB.team.currentStreak;
 
+            // Update button text with team names
+            document.getElementById(
+                "left-team-name"
+            ).textContent = `${this.slotA.team.name} Wins`;
+            document.getElementById(
+                "right-team-name"
+            ).textContent = `${this.slotB.team.name} Wins`;
+
             // Update no-match message based on queue size
             const existingNoMatch = matchDisplay.querySelector(".no-match");
             if (existingNoMatch) {
