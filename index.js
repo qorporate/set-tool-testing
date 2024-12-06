@@ -88,6 +88,7 @@ class GameManager {
         this.currentState = GameState.WAITING_FOR_TEAMS;
 
         this.initializeEventListeners();
+        this.loadGameState();
         this.updateDisplay();
     }
 
@@ -115,8 +116,8 @@ class GameManager {
 
         if (
             this.queue.items.some((team) => team.name === teamName) ||
-            this.currentTeam1?.name === teamName ||
-            this.currentTeam2?.name === teamName
+            this.slotA.team?.name === teamName ||
+            this.slotB.team?.name === teamName
         ) {
             this.showError("Team name already exists");
             return;
@@ -126,36 +127,67 @@ class GameManager {
         this.queue.enqueue(newTeam);
         input.value = "";
 
-        if (!this.currentTeam1 || !this.currentTeam2) {
+        if (!this.slotA.team || !this.slotB.team) {
             this.setupNextMatch();
         }
 
+        this.saveGameState();
         this.updateDisplay();
     }
 
     removeTeam(teamName) {
         // If the team is in the current match, we need to handle that
         if (
-            this.currentTeam1?.name === teamName ||
-            this.currentTeam2?.name === teamName
+            this.slotA.team?.name === teamName ||
+            this.slotB.team?.name === teamName
         ) {
-            this.currentTeam1 = null;
-            this.currentTeam2 = null;
+            this.slotA.team = null;
+            this.slotB.team = null;
             this.setupNextMatch();
         }
 
         this.queue.remove(teamName);
+        this.saveGameState();
         this.updateDisplay();
     }
 
     moveTeamUp(teamName) {
         this.queue.moveUp(teamName);
+        this.saveGameState();
         this.updateDisplay();
     }
 
     moveTeamDown(teamName) {
         this.queue.moveDown(teamName);
+        this.saveGameState();
         this.updateDisplay();
+    }
+
+    loadGameState() {
+        const savedState = localStorage.getItem("gameState");
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            this.queue.items = state.queueItems.map((item) => item);
+            this.slotA.team = state.teamInMatchA ? state.teamInMatchA : null;
+            this.slotB.team = state.teamInMatchB ? state.teamInMatchB : null;
+            this.currentState = state.currentState;
+            this.updateDisplay();
+        }
+    }
+
+    saveGameState() {
+        const state = {
+            queueItems: this.queue.items,
+            teamInMatchA: this.slotA.team,
+            teamInMatchB: this.slotB.team,
+            currentState: this.currentState,
+        };
+        localStorage.setItem("gameState", JSON.stringify(state));
+    }
+
+    resetGame() {
+        localStorage.removeItem("gameState");
+        location.reload(); // Refresh the page
     }
 
     editTeamName(oldName) {
@@ -191,6 +223,7 @@ class GameManager {
             this.slotB.team.name = newName;
         }
 
+        this.saveGameState();
         this.updateDisplay();
     }
 
@@ -204,20 +237,26 @@ class GameManager {
             this.slotA.team.currentStreak++;
 
             this.slotB.team.currentStreak = 0;
-            this.queue.enqueue(this.slotB.team);
-            this.slotB.clear();
 
-            this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
+            if (this.queue.items.length > 0) {
+                this.queue.enqueue(this.slotB.team);
+                this.slotB.clear();
+
+                this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
+            }
         } else if (result === "team2") {
             this.slotB.team.wins++;
             this.slotB.team.currentStreak++;
 
             this.slotA.team.currentStreak = 0;
-            this.queue.enqueue(this.slotA.team);
-            this.slotA.clear();
 
-            // winner stays in their slot. no swap.
-            this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
+            if (this.queue.items.length > 0) {
+                this.queue.enqueue(this.slotA.team);
+                this.slotA.clear();
+
+                // winner stays in their slot. no swap.
+                this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
+            }
         } else if (result === "draw") {
             this.slotA.team.currentStreak = 0;
             this.slotB.team.currentStreak = 0;
@@ -235,6 +274,7 @@ class GameManager {
             this.currentState = GameState.WAITING_FOR_TEAMS;
         }
 
+        // we don't save state here, because the next method alters the state again
         this.setupNextMatch();
     }
 
@@ -361,6 +401,7 @@ class GameManager {
                 break;
         }
 
+        this.saveGameState();
         this.updateDisplay();
     }
 
