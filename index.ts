@@ -51,11 +51,15 @@ class Queue {
 class Team {
     name: string;
     wins: number;
+    draws: number;
+    losses: number;
     currentStreak: number;
 
     constructor(name: string) {
         this.name = name;
         this.wins = 0;
+        this.draws = 0;
+        this.losses = 0;
         this.currentStreak = 0;
     }
 }
@@ -284,6 +288,7 @@ class GameManager {
             this.slotA.team.wins++;
             this.slotA.team.currentStreak++;
 
+            this.slotB.team.losses++;
             this.slotB.team.currentStreak = 0;
 
             if (this.queue.items.length > 0) {
@@ -296,6 +301,7 @@ class GameManager {
             this.slotB.team.wins++;
             this.slotB.team.currentStreak++;
 
+            this.slotA.team.losses++;
             this.slotA.team.currentStreak = 0;
 
             if (this.queue.items.length > 0) {
@@ -306,7 +312,10 @@ class GameManager {
                 this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
             }
         } else if (result === "draw") {
+            this.slotA.team.draws++;
             this.slotA.team.currentStreak = 0;
+
+            this.slotB.team.draws++;
             this.slotB.team.currentStreak = 0;
 
             if (this.slotA.team.wins <= this.slotB.team.wins) {
@@ -371,8 +380,9 @@ class GameManager {
                 "h2"
             ).textContent = this.slotA.team.name;
 
-            getElementById("team1-wins").textContent =
-                this.slotA.team.wins.toString();
+            getElementById("team1-stats").textContent = this.formatTeamStats(
+                this.slotA.team
+            );
             getElementById("team1-streak").textContent =
                 this.slotA.team.currentStreak.toString();
 
@@ -380,8 +390,9 @@ class GameManager {
                 getElementById("team2"),
                 "h2"
             ).textContent = this.slotB.team.name;
-            getElementById("team2-wins").textContent =
-                this.slotB.team.wins.toString();
+            getElementById("team2-stats").textContent = this.formatTeamStats(
+                this.slotB.team
+            );
             getElementById("team2-streak").textContent =
                 this.slotB.team.currentStreak.toString();
 
@@ -452,6 +463,10 @@ class GameManager {
         }
     }
 
+    private formatTeamStats(team: Team): string {
+        return `${team.wins}W | ${team.draws}D | ${team.losses}L`;
+    }
+
     private updateQueueDisplay() {
         // Update queue display
         const queueList = document.getElementById("queue-list");
@@ -464,7 +479,7 @@ class GameManager {
             const li = document.createElement("li");
             li.className = "queue-item";
             li.innerHTML = `
-                <span>${team.name} (Wins: ${team.wins})</span>
+                <span>${team.name}<br><em>${this.formatTeamStats(team)}</em></span>
                 <div class="queue-item-buttons">
                 <button class="move-button" onclick="game.moveTeamUp('${
                     team.name

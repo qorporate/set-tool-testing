@@ -42,6 +42,8 @@ var Team = /** @class */ (function () {
     function Team(name) {
         this.name = name;
         this.wins = 0;
+        this.draws = 0;
+        this.losses = 0;
         this.currentStreak = 0;
     }
     return Team;
@@ -214,6 +216,7 @@ var GameManager = /** @class */ (function () {
         if (result === "team1") {
             this.slotA.team.wins++;
             this.slotA.team.currentStreak++;
+            this.slotB.team.losses++;
             this.slotB.team.currentStreak = 0;
             if (this.queue.items.length > 0) {
                 this.queue.enqueue(this.slotB.team);
@@ -224,6 +227,7 @@ var GameManager = /** @class */ (function () {
         else if (result === "team2") {
             this.slotB.team.wins++;
             this.slotB.team.currentStreak++;
+            this.slotA.team.losses++;
             this.slotA.team.currentStreak = 0;
             if (this.queue.items.length > 0) {
                 this.queue.enqueue(this.slotA.team);
@@ -233,7 +237,9 @@ var GameManager = /** @class */ (function () {
             }
         }
         else if (result === "draw") {
+            this.slotA.team.draws++;
             this.slotA.team.currentStreak = 0;
+            this.slotB.team.draws++;
             this.slotB.team.currentStreak = 0;
             if (this.slotA.team.wins <= this.slotB.team.wins) {
                 this.queue.enqueue(this.slotA.team);
@@ -281,13 +287,11 @@ var GameManager = /** @class */ (function () {
             currentMatch.style.display = "flex";
             buttons.style.display = "flex";
             getElementByQuerySelector(getElementById("team1"), "h2").textContent = this.slotA.team.name;
-            getElementById("team1-wins").textContent =
-                this.slotA.team.wins.toString();
+            getElementById("team1-stats").textContent = this.formatTeamStats(this.slotA.team);
             getElementById("team1-streak").textContent =
                 this.slotA.team.currentStreak.toString();
             getElementByQuerySelector(getElementById("team2"), "h2").textContent = this.slotB.team.name;
-            getElementById("team2-wins").textContent =
-                this.slotB.team.wins.toString();
+            getElementById("team2-stats").textContent = this.formatTeamStats(this.slotB.team);
             getElementById("team2-streak").textContent =
                 this.slotB.team.currentStreak.toString();
             // Update button text with team names
@@ -338,6 +342,9 @@ var GameManager = /** @class */ (function () {
             return innerElement;
         }
     };
+    GameManager.prototype.formatTeamStats = function (team) {
+        return "".concat(team.wins, "W | ").concat(team.draws, "D | ").concat(team.losses, "L");
+    };
     GameManager.prototype.updateQueueDisplay = function () {
         var _this = this;
         // Update queue display
@@ -349,7 +356,7 @@ var GameManager = /** @class */ (function () {
         this.queue.items.forEach(function (team, index) {
             var li = document.createElement("li");
             li.className = "queue-item";
-            li.innerHTML = "\n                <span>".concat(team.name, " (Wins: ").concat(team.wins, ")</span>\n                <div class=\"queue-item-buttons\">\n                <button class=\"move-button\" onclick=\"game.moveTeamUp('").concat(team.name, "')\" ").concat(index === 0 ? "disabled" : "", ">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-up\"><path d=\"m18 15-6-6-6 6\"/></svg>\n            </button>\n            <button class=\"move-button\" onclick=\"game.moveTeamDown('").concat(team.name, "')\" ").concat(index === _this.queue.items.length - 1 ? "disabled" : "", ">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-down\"><path d=\"m6 9 6 6 6-6\"/></svg>\n            </button>\n            <button class=\"edit-team\" onclick=\"game.editTeamName('").concat(team.name, "')\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-pencil\"><path d=\"M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\"/><path d=\"m15 5 4 4\"/></svg>\n            </button>\n                    <button class=\"remove-team\" onclick=\"game.removeTeam('").concat(team.name, "')\">Remove</button>\n                </div>\n            ");
+            li.innerHTML = "\n                <span>".concat(team.name, "<br><em>").concat(_this.formatTeamStats(team), "</em></span>\n                <div class=\"queue-item-buttons\">\n                <button class=\"move-button\" onclick=\"game.moveTeamUp('").concat(team.name, "')\" ").concat(index === 0 ? "disabled" : "", ">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-up\"><path d=\"m18 15-6-6-6 6\"/></svg>\n            </button>\n            <button class=\"move-button\" onclick=\"game.moveTeamDown('").concat(team.name, "')\" ").concat(index === _this.queue.items.length - 1 ? "disabled" : "", ">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-down\"><path d=\"m6 9 6 6 6-6\"/></svg>\n            </button>\n            <button class=\"edit-team\" onclick=\"game.editTeamName('").concat(team.name, "')\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-pencil\"><path d=\"M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\"/><path d=\"m15 5 4 4\"/></svg>\n            </button>\n                    <button class=\"remove-team\" onclick=\"game.removeTeam('").concat(team.name, "')\">Remove</button>\n                </div>\n            ");
             queueList.appendChild(li);
         });
         // Update waiting count
