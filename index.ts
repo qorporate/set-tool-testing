@@ -98,7 +98,6 @@ class MatchSlot {
         this.team = null;
     }
 
-    // todo: add type assertion so we don't need to throw an Error?
     isEmpty() {
         return this.team === null;
     }

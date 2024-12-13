@@ -71,7 +71,6 @@ var MatchSlot = /** @class */ (function () {
     MatchSlot.prototype.clear = function () {
         this.team = null;
     };
-    // todo: add type assertion so we don't need to throw an Error?
     MatchSlot.prototype.isEmpty = function () {
         return this.team === null;
     };
