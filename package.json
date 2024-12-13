@@ -1,0 +1,15 @@
+{
+  "name": "set-tool-official",
+  "version": "1.0.0",
+  "description": "Manage sets when playing sports. Add as many teams as you'd like.",
+  "main": "index.js",
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
