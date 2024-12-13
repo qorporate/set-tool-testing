@@ -11,6 +11,10 @@ Install _Live Server_ or _Live Preview_ extension. Open the index.html file in t
 
 If you'd rather not use the extension, you can open the index.html file in the browser without it. Refresh the page to see updates.
 
+### Deployment
+
+Ensure you run `npm tsc` before pushing to Github, else the latest version of the code won't be in index.js.
+
 ## Usage
 
 1. Open the index.html file in the browser.
