@@ -75,6 +75,12 @@ interface State {
     currentState: GameState;
 }
 
+enum MatchResult {
+    Team1 = "team1",
+    Team2 = "team2",
+    Draw = "draw",
+}
+
 class MatchSlot {
     position: Slot;
     team: Team | null;
@@ -262,7 +268,7 @@ class GameManager {
         this.updateDisplay();
     }
 
-    handleResult(result: "team1" | "team2" | "draw") {
+    handleResult(result: MatchResult) {
         if (this.slotA.isEmpty() || this.slotB.isEmpty()) {
             return;
         }

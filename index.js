@@ -18,14 +18,10 @@ var Queue = /** @class */ (function () {
         return this.items.length;
     };
     Queue.prototype.remove = function (teamName) {
-        this.items = this.items.filter(function (team) {
-            return team.name !== teamName;
-        });
+        this.items = this.items.filter(function (team) { return team.name !== teamName; });
     };
     Queue.prototype.moveUp = function (teamName) {
-        var index = this.items.findIndex(function (team) {
-            return team.name === teamName;
-        });
+        var index = this.items.findIndex(function (team) { return team.name === teamName; });
         if (index > 0) {
             var temp = this.items[index];
             this.items[index] = this.items[index - 1];
@@ -33,9 +29,7 @@ var Queue = /** @class */ (function () {
         }
     };
     Queue.prototype.moveDown = function (teamName) {
-        var index = this.items.findIndex(function (team) {
-            return team.name === teamName;
-        });
+        var index = this.items.findIndex(function (team) { return team.name === teamName; });
         if (index < this.items.length - 1) {
             var temp = this.items[index];
             this.items[index] = this.items[index + 1];
@@ -43,7 +37,7 @@ var Queue = /** @class */ (function () {
         }
     };
     return Queue;
-})();
+}());
 var Team = /** @class */ (function () {
     function Team(name) {
         this.name = name;
@@ -51,14 +45,21 @@ var Team = /** @class */ (function () {
         this.currentStreak = 0;
     }
     return Team;
-})();
+}());
 var GameState = /** @class */ (function () {
-    function GameState() {}
+    function GameState() {
+    }
     GameState.WAITING_FOR_TEAMS = "WAITING_FOR_TEAMS";
     GameState.MATCH_IN_PROGRESS = "MATCH_IN_PROGRESS";
     GameState.WINNER_NEEDS_CHALLENGER = "WINNER_NEEDS_CHALLENGER";
     return GameState;
-})();
+}());
+var MatchResult;
+(function (MatchResult) {
+    MatchResult["Team1"] = "team1";
+    MatchResult["Team2"] = "team2";
+    MatchResult["Draw"] = "draw";
+})(MatchResult || (MatchResult = {}));
 var MatchSlot = /** @class */ (function () {
     function MatchSlot(position) {
         this.position = position; // 'A' or 'B'
@@ -75,7 +76,7 @@ var MatchSlot = /** @class */ (function () {
         return this.team === null;
     };
     return MatchSlot;
-})();
+}());
 var GameManager = /** @class */ (function () {
     function GameManager() {
         this.slotA = new MatchSlot("A");
@@ -111,17 +112,9 @@ var GameManager = /** @class */ (function () {
             this.showError("Please enter a team name");
             return;
         }
-        if (
-            this.queue.items.some(function (team) {
-                return team.name === teamName;
-            }) ||
-            ((_a = this.slotA.team) === null || _a === void 0
-                ? void 0
-                : _a.name) === teamName ||
-            ((_b = this.slotB.team) === null || _b === void 0
-                ? void 0
-                : _b.name) === teamName
-        ) {
+        if (this.queue.items.some(function (team) { return team.name === teamName; }) ||
+            ((_a = this.slotA.team) === null || _a === void 0 ? void 0 : _a.name) === teamName ||
+            ((_b = this.slotB.team) === null || _b === void 0 ? void 0 : _b.name) === teamName) {
             this.showError("Team name already exists");
             return;
         }
@@ -137,14 +130,8 @@ var GameManager = /** @class */ (function () {
     GameManager.prototype.removeTeam = function (teamName) {
         var _a, _b;
         // If the team is in the current match, we need to handle that
-        if (
-            ((_a = this.slotA.team) === null || _a === void 0
-                ? void 0
-                : _a.name) === teamName ||
-            ((_b = this.slotB.team) === null || _b === void 0
-                ? void 0
-                : _b.name) === teamName
-        ) {
+        if (((_a = this.slotA.team) === null || _a === void 0 ? void 0 : _a.name) === teamName ||
+            ((_b = this.slotB.team) === null || _b === void 0 ? void 0 : _b.name) === teamName) {
             this.slotA.team = null;
             this.slotB.team = null;
             this.setupNextMatch();
@@ -164,13 +151,10 @@ var GameManager = /** @class */ (function () {
         this.updateDisplay();
     };
     GameManager.prototype.loadGameState = function () {
-        // todo: use GRs method to strongly type local storage
         var savedState = localStorage.getItem("gameState");
         if (savedState) {
             var state = JSON.parse(savedState);
-            this.queue.items = state.queueItems.map(function (item) {
-                return item;
-            });
+            this.queue.items = state.queueItems.map(function (item) { return item; });
             this.slotA.team = state.teamInMatchA ? state.teamInMatchA : null;
             this.slotB.team = state.teamInMatchB ? state.teamInMatchB : null;
             this.currentState = state.currentState;
@@ -192,49 +176,27 @@ var GameManager = /** @class */ (function () {
     };
     GameManager.prototype.editTeamName = function (oldName) {
         var _a, _b, _c, _d, _e;
-        var newName =
-            (_a = prompt("Enter new team name:", oldName)) === null ||
-            _a === void 0
-                ? void 0
-                : _a.trim().toUpperCase();
+        var newName = (_a = prompt("Enter new team name:", oldName)) === null || _a === void 0 ? void 0 : _a.trim().toUpperCase();
         if (!newName || newName === oldName) {
             return;
         }
         // Check if new name already exists
-        if (
-            this.queue.items.some(function (team) {
-                return team.name === newName;
-            }) ||
-            ((_b = this.slotA.team) === null || _b === void 0
-                ? void 0
-                : _b.name) === newName ||
-            ((_c = this.slotB.team) === null || _c === void 0
-                ? void 0
-                : _c.name) === newName
-        ) {
+        if (this.queue.items.some(function (team) { return team.name === newName; }) ||
+            ((_b = this.slotA.team) === null || _b === void 0 ? void 0 : _b.name) === newName ||
+            ((_c = this.slotB.team) === null || _c === void 0 ? void 0 : _c.name) === newName) {
             this.showError("Team name already exists");
             return;
         }
         // Update name in queue
-        var team = this.queue.items.find(function (team) {
-            return team.name === oldName;
-        });
+        var team = this.queue.items.find(function (team) { return team.name === oldName; });
         if (team) {
             team.name = newName;
         }
         // Update name in slots if necessary
-        if (
-            ((_d = this.slotA.team) === null || _d === void 0
-                ? void 0
-                : _d.name) === oldName
-        ) {
+        if (((_d = this.slotA.team) === null || _d === void 0 ? void 0 : _d.name) === oldName) {
             this.slotA.team.name = newName;
         }
-        if (
-            ((_e = this.slotB.team) === null || _e === void 0
-                ? void 0
-                : _e.name) === oldName
-        ) {
+        if (((_e = this.slotB.team) === null || _e === void 0 ? void 0 : _e.name) === oldName) {
             this.slotB.team.name = newName;
         }
         this.saveGameState();
@@ -259,7 +221,8 @@ var GameManager = /** @class */ (function () {
                 this.slotB.clear();
                 this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
             }
-        } else if (result === "team2") {
+        }
+        else if (result === "team2") {
             this.slotB.team.wins++;
             this.slotB.team.currentStreak++;
             this.slotA.team.currentStreak = 0;
@@ -269,13 +232,15 @@ var GameManager = /** @class */ (function () {
                 // winner stays in their slot. no swap.
                 this.currentState = GameState.WINNER_NEEDS_CHALLENGER;
             }
-        } else if (result === "draw") {
+        }
+        else if (result === "draw") {
             this.slotA.team.currentStreak = 0;
             this.slotB.team.currentStreak = 0;
             if (this.slotA.team.wins <= this.slotB.team.wins) {
                 this.queue.enqueue(this.slotA.team);
                 this.queue.enqueue(this.slotB.team);
-            } else {
+            }
+            else {
                 this.queue.enqueue(this.slotB.team);
                 this.queue.enqueue(this.slotA.team);
             }
@@ -317,31 +282,19 @@ var GameManager = /** @class */ (function () {
             }
             currentMatch.style.display = "flex";
             buttons.style.display = "flex";
-            getElementByQuerySelector(
-                getElementById("team1"),
-                "h2"
-            ).textContent = this.slotA.team.name;
+            getElementByQuerySelector(getElementById("team1"), "h2").textContent = this.slotA.team.name;
             getElementById("team1-wins").textContent =
                 this.slotA.team.wins.toString();
             getElementById("team1-streak").textContent =
                 this.slotA.team.currentStreak.toString();
-            getElementByQuerySelector(
-                getElementById("team2"),
-                "h2"
-            ).textContent = this.slotB.team.name;
+            getElementByQuerySelector(getElementById("team2"), "h2").textContent = this.slotB.team.name;
             getElementById("team2-wins").textContent =
                 this.slotB.team.wins.toString();
             getElementById("team2-streak").textContent =
                 this.slotB.team.currentStreak.toString();
             // Update button text with team names
-            getElementById("left-team-name").textContent = "".concat(
-                this.slotA.team.name,
-                " Wins"
-            );
-            getElementById("right-team-name").textContent = "".concat(
-                this.slotB.team.name,
-                " Wins"
-            );
+            getElementById("left-team-name").textContent = "".concat(this.slotA.team.name, " Wins");
+            getElementById("right-team-name").textContent = "".concat(this.slotB.team.name, " Wins");
             // Update no-match message based on queue size
             var existingNoMatch = matchDisplay.querySelector(".no-match");
             if (existingNoMatch) {
@@ -353,7 +306,8 @@ var GameManager = /** @class */ (function () {
                 noMatch.textContent = "Add more teams to swap out losers";
                 matchDisplay.appendChild(noMatch);
             }
-        } else {
+        }
+        else {
             currentMatch.style.display = "none";
             buttons.style.display = "none";
             var existingNoMatch = matchDisplay.querySelector(".no-match");
@@ -374,30 +328,7 @@ var GameManager = /** @class */ (function () {
         this.queue.items.forEach(function (team, index) {
             var li = document.createElement("li");
             li.className = "queue-item";
-            li.innerHTML = "\n                <span>"
-                .concat(team.name, " (Wins: ")
-                .concat(
-                    team.wins,
-                    ')</span>\n                <div class="queue-item-buttons">\n                <button class="move-button" onclick="game.moveTeamUp(\''
-                )
-                .concat(team.name, "')\" ")
-                .concat(
-                    index === 0 ? "disabled" : "",
-                    '>\n                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up"><path d="m18 15-6-6-6 6"/></svg>\n            </button>\n            <button class="move-button" onclick="game.moveTeamDown(\''
-                )
-                .concat(team.name, "')\" ")
-                .concat(
-                    index === _this.queue.items.length - 1 ? "disabled" : "",
-                    '>\n                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>\n            </button>\n            <button class="edit-team" onclick="game.editTeamName(\''
-                )
-                .concat(
-                    team.name,
-                    '\')">\n                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>\n            </button>\n                    <button class="remove-team" onclick="game.removeTeam(\''
-                )
-                .concat(
-                    team.name,
-                    "')\">Remove</button>\n                </div>\n            "
-                );
+            li.innerHTML = "\n                <span>".concat(team.name, " (Wins: ").concat(team.wins, ")</span>\n                <div class=\"queue-item-buttons\">\n                <button class=\"move-button\" onclick=\"game.moveTeamUp('").concat(team.name, "')\" ").concat(index === 0 ? "disabled" : "", ">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-up\"><path d=\"m18 15-6-6-6 6\"/></svg>\n            </button>\n            <button class=\"move-button\" onclick=\"game.moveTeamDown('").concat(team.name, "')\" ").concat(index === _this.queue.items.length - 1 ? "disabled" : "", ">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-chevron-down\"><path d=\"m6 9 6 6 6-6\"/></svg>\n            </button>\n            <button class=\"edit-team\" onclick=\"game.editTeamName('").concat(team.name, "')\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-pencil\"><path d=\"M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z\"/><path d=\"m15 5 4 4\"/></svg>\n            </button>\n                    <button class=\"remove-team\" onclick=\"game.removeTeam('").concat(team.name, "')\">Remove</button>\n                </div>\n            ");
             queueList.appendChild(li);
         });
         // Update waiting count
@@ -418,9 +349,7 @@ var GameManager = /** @class */ (function () {
         function getElementByQuerySelector(element, selector) {
             var innerElement = element.querySelector(selector);
             if (!innerElement) {
-                throw new Error(
-                    "Uh oh! Can't get element with selector ".concat(selector)
-                );
+                throw new Error("Uh oh! Can't get element with selector ".concat(selector));
             }
             return innerElement;
         }
@@ -440,7 +369,8 @@ var GameManager = /** @class */ (function () {
                     if (!this.slotA.isEmpty()) {
                         // Winner in A, fill B
                         this.slotB.setTeam(getTeamFromQueue(this));
-                    } else {
+                    }
+                    else {
                         // Winner in B, fill A
                         this.slotA.setTeam(getTeamFromQueue(this));
                     }
@@ -454,7 +384,8 @@ var GameManager = /** @class */ (function () {
             var team = gameManager.queue.dequeue();
             if (team) {
                 return team;
-            } else {
+            }
+            else {
                 throw new Error("");
             }
         }
@@ -472,5 +403,5 @@ var GameManager = /** @class */ (function () {
         });
     };
     return GameManager;
-})();
+}());
 var game = new GameManager();
