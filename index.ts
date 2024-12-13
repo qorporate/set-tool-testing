@@ -230,8 +230,13 @@ class GameManager {
     }
 
     resetGame() {
-        localStorage.removeItem("gameState");
-        location.reload(); // Refresh the page
+        const confirmation = confirm(
+            "Are you sure you want to reset the game? This action is unrecoverable."
+        );
+        if (confirmation) {
+            localStorage.removeItem("gameState");
+            location.reload(); // Refresh the page
+        }
     }
 
     editTeamName(oldName: string) {
@@ -479,7 +484,9 @@ class GameManager {
             const li = document.createElement("li");
             li.className = "queue-item";
             li.innerHTML = `
-                <span>${team.name}<br><em>${this.formatTeamStats(team)}</em></span>
+                <span>${team.name}<br><em>${this.formatTeamStats(
+                team
+            )}</em></span>
                 <div class="queue-item-buttons">
                 <button class="move-button" onclick="game.moveTeamUp('${
                     team.name

@@ -172,8 +172,11 @@ var GameManager = /** @class */ (function () {
         localStorage.setItem("gameState", JSON.stringify(state));
     };
     GameManager.prototype.resetGame = function () {
-        localStorage.removeItem("gameState");
-        location.reload(); // Refresh the page
+        var confirmation = confirm("Are you sure you want to reset the game? This action is unrecoverable.");
+        if (confirmation) {
+            localStorage.removeItem("gameState");
+            location.reload(); // Refresh the page
+        }
     };
     GameManager.prototype.editTeamName = function (oldName) {
         var _a, _b, _c, _d, _e;
