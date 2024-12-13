@@ -259,7 +259,6 @@ var GameManager = /** @class */ (function () {
         drawButton.disabled = this.queue.size() <= 1;
     };
     GameManager.prototype.updateDisplay = function () {
-        var _this = this;
         var matchDisplay = document.getElementById("match-display");
         if (!matchDisplay) {
             throw new Error("Uh oh! Can't get the match display element.");
@@ -307,8 +306,11 @@ var GameManager = /** @class */ (function () {
             }
         }
         else {
+            // don't display a match
             currentMatch.style.display = "none";
             buttons.style.display = "none";
+            // prompt the user to add more teams
+            // but prevent duplicate prompts by removing the old one
             var existingNoMatch = matchDisplay.querySelector(".no-match");
             if (existingNoMatch) {
                 existingNoMatch.remove();
@@ -318,6 +320,26 @@ var GameManager = /** @class */ (function () {
             noMatch.textContent = "Add more teams to start matches";
             matchDisplay.appendChild(noMatch);
         }
+        this.updateQueueDisplay();
+        // Update draw button state
+        this.updateDrawButton();
+        function getElementById(id) {
+            var element = document.getElementById(id);
+            if (!element) {
+                throw new Error("Uh oh! Can't get element with id ".concat(id));
+            }
+            return element;
+        }
+        function getElementByQuerySelector(element, selector) {
+            var innerElement = element.querySelector(selector);
+            if (!innerElement) {
+                throw new Error("Uh oh! Can't get element with selector ".concat(selector));
+            }
+            return innerElement;
+        }
+    };
+    GameManager.prototype.updateQueueDisplay = function () {
+        var _this = this;
         // Update queue display
         var queueList = document.getElementById("queue-list");
         if (!queueList) {
@@ -336,22 +358,6 @@ var GameManager = /** @class */ (function () {
             throw new Error("Uh oh! Can't get the waiting count element!");
         }
         waitingCount.textContent = "(".concat(this.queue.size(), " waiting)");
-        // Update draw button state
-        this.updateDrawButton();
-        function getElementById(id) {
-            var element = document.getElementById(id);
-            if (!element) {
-                throw new Error("Uh oh! Can't get element with id ".concat(id));
-            }
-            return element;
-        }
-        function getElementByQuerySelector(element, selector) {
-            var innerElement = element.querySelector(selector);
-            if (!innerElement) {
-                throw new Error("Uh oh! Can't get element with selector ".concat(selector));
-            }
-            return innerElement;
-        }
     };
     GameManager.prototype.setupNextMatch = function () {
         switch (this.currentState) {

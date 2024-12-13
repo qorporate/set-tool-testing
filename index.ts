@@ -406,9 +406,12 @@ class GameManager {
                 matchDisplay.appendChild(noMatch);
             }
         } else {
+            // don't display a match
             currentMatch.style.display = "none";
             buttons.style.display = "none";
 
+            // prompt the user to add more teams
+            // but prevent duplicate prompts by removing the old one
             const existingNoMatch = matchDisplay.querySelector(".no-match");
             if (existingNoMatch) {
                 existingNoMatch.remove();
@@ -420,6 +423,36 @@ class GameManager {
             matchDisplay.appendChild(noMatch);
         }
 
+        this.updateQueueDisplay();
+
+        // Update draw button state
+        this.updateDrawButton();
+
+        function getElementById(id: string): HTMLElement | HTMLInputElement {
+            const element = document.getElementById(id);
+            if (!element) {
+                throw new Error(`Uh oh! Can't get element with id ${id}`);
+            }
+
+            return element;
+        }
+
+        function getElementByQuerySelector(
+            element: HTMLElement,
+            selector: string
+        ): Element {
+            const innerElement = element.querySelector(selector);
+            if (!innerElement) {
+                throw new Error(
+                    `Uh oh! Can't get element with selector ${selector}`
+                );
+            }
+
+            return innerElement;
+        }
+    }
+
+    private updateQueueDisplay() {
         // Update queue display
         const queueList = document.getElementById("queue-list");
         if (!queueList) {
@@ -463,32 +496,6 @@ class GameManager {
         }
 
         waitingCount.textContent = `(${this.queue.size()} waiting)`;
-
-        // Update draw button state
-        this.updateDrawButton();
-
-        function getElementById(id: string): HTMLElement | HTMLInputElement {
-            const element = document.getElementById(id);
-            if (!element) {
-                throw new Error(`Uh oh! Can't get element with id ${id}`);
-            }
-
-            return element;
-        }
-
-        function getElementByQuerySelector(
-            element: HTMLElement,
-            selector: string
-        ): Element {
-            const innerElement = element.querySelector(selector);
-            if (!innerElement) {
-                throw new Error(
-                    `Uh oh! Can't get element with selector ${selector}`
-                );
-            }
-
-            return innerElement;
-        }
     }
 
     setupNextMatch() {
