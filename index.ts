@@ -484,9 +484,9 @@ class GameManager {
             const li = document.createElement("li");
             li.className = "queue-item";
             li.innerHTML = `
-                <span>${team.name}<br><em>${this.formatTeamStats(
-                team
-            )}</em></span>
+                <span><b>${
+                    team.name
+                }</b><br><em>${this.formatTeamStats(team)}</em></span>
                 <div class="queue-item-buttons">
                 <button class="move-button" onclick="game.moveTeamUp('${
                     team.name
