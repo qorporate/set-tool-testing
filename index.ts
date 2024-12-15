@@ -484,30 +484,36 @@ class GameManager {
             const li = document.createElement("li");
             li.className = "queue-item";
             li.innerHTML = `
-                <span><b>${
-                    team.name
-                }</b><br><em>${this.formatTeamStats(team)}</em></span>
-                <div class="queue-item-buttons">
+            <span><b>${team.name}</b> - <em>${this.formatTeamStats(
+                team
+            )}</em></span>
+            <div class="queue-item-buttons">
                 <button class="move-button" onclick="game.moveTeamUp('${
                     team.name
-                }')" ${index === 0 ? "disabled" : ""}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-up"><path d="m18 15-6-6-6 6"/></svg>
-            </button>
-            <button class="move-button" onclick="game.moveTeamDown('${
+                }')" ${index === 0 ? "disabled" : ""} aria-label="Move ${
                 team.name
-            }')" ${index === this.queue.items.length - 1 ? "disabled" : ""}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>
-            </button>
-            <button class="edit-team" onclick="game.editTeamName('${
-                team.name
-            }')">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-            </button>
-                    <button class="remove-team" onclick="game.removeTeam('${
-                        team.name
-                    }')">Remove</button>
-                </div>
-            `;
+            } up">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+                <button class="move-button" onclick="game.moveTeamDown('${
+                    team.name
+                }')" ${
+                index === this.queue.items.length - 1 ? "disabled" : ""
+            } aria-label="Move ${team.name} down">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <button class="edit-team" onclick="game.editTeamName('${
+                    team.name
+                }')" aria-label="Edit ${team.name}">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+                <button class="remove-team" onclick="game.removeTeam('${
+                    team.name
+                }')" aria-label="Remove ${team.name}">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        `;
             queueList.appendChild(li);
         });
 
