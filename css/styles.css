@@ -97,8 +97,6 @@ button:hover:not(:disabled) {
 }
 
 .team-management {
-    margin-top: 20px;
-    padding-top: 20px;
     border-top: 1px solid #ddd;
 }
 
@@ -179,11 +177,6 @@ input[type="text"] {
     justify-content: center;
     width: 34px;
     height: 34px;
-}
-
-.edit-team svg {
-    width: 20px;
-    height: 20px;
 }
 
 .reset {
