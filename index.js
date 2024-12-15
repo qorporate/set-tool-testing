@@ -206,6 +206,30 @@ var GameManager = /** @class */ (function () {
         this.saveGameState();
         this.updateDisplay();
     };
+    GameManager.prototype.swapTeamInMatch = function (slot) {
+        if (this.queue.isEmpty()) {
+            this.showError("No teams in queue to swap");
+            return;
+        }
+        var teamToSwap = slot === "A" ? this.slotA.team : this.slotB.team;
+        if (!teamToSwap) {
+            this.showError("No team in slot ".concat(slot, " to swap"));
+            return;
+        }
+        var newTeam = this.queue.dequeue();
+        if (!newTeam) {
+            throw new Error("Queue is empty");
+        }
+        if (slot === "A") {
+            this.slotA.setTeam(newTeam);
+        }
+        else {
+            this.slotB.setTeam(newTeam);
+        }
+        this.queue.enqueue(teamToSwap);
+        this.saveGameState();
+        this.updateDisplay();
+    };
     GameManager.prototype.handleResult = function (result) {
         if (this.slotA.isEmpty() || this.slotB.isEmpty()) {
             return;
@@ -266,6 +290,24 @@ var GameManager = /** @class */ (function () {
         }
         // Disable draw button if there's only one or no teams waiting
         drawButton.disabled = this.queue.size() <= 1;
+    };
+    GameManager.prototype.updateSwapButton = function () {
+        var team1SwapButton = document.getElementById("team1-swap-button");
+        if (!team1SwapButton) {
+            throw new Error("Uh oh! No swap button for team 1.");
+        }
+        var team2SwapButton = document.getElementById("team2-swap-button");
+        if (!team2SwapButton) {
+            throw new Error("Uh oh! No swap button for team 2.");
+        }
+        if (this.queue.isEmpty()) {
+            team1SwapButton.disabled = true;
+            team2SwapButton.disabled = true;
+        }
+        else {
+            team1SwapButton.disabled = false;
+            team2SwapButton.disabled = false;
+        }
     };
     GameManager.prototype.updateDisplay = function () {
         var matchDisplay = document.getElementById("match-display");
@@ -328,8 +370,10 @@ var GameManager = /** @class */ (function () {
             matchDisplay.appendChild(noMatch);
         }
         this.updateQueueDisplay();
-        // Update draw button state
+        // Update button state
         this.updateDrawButton();
+        this.updateSwapButton();
+        // todo: move to util section
         function getElementById(id) {
             var element = document.getElementById(id);
             if (!element) {
@@ -369,12 +413,22 @@ var GameManager = /** @class */ (function () {
         }
         waitingCount.textContent = "(".concat(this.queue.size(), " waiting)");
     };
+    /// Why do we set the currentStreak to 0 when adding new teams?
+    /// well, when we added the feature to move teams into the queue from a match
+    /// we found the streak was maintained.
+    /// I chose not to clear the streak in that function, in case the team moved was immediately
+    /// put back in the match.
+    /// So, whenever a new team enters the match, we make sure to reset the value.
     GameManager.prototype.setupNextMatch = function () {
         switch (this.currentState) {
             case GameState.WAITING_FOR_TEAMS:
                 if (this.queue.size() >= 2) {
-                    this.slotA.setTeam(getTeamFromQueue(this));
-                    this.slotB.setTeam(getTeamFromQueue(this));
+                    var teamA = getTeamFromQueue(this);
+                    teamA.currentStreak = 0;
+                    var teamB = getTeamFromQueue(this);
+                    teamB.currentStreak = 0;
+                    this.slotA.setTeam(teamA);
+                    this.slotB.setTeam(teamB);
                     this.currentState = GameState.MATCH_IN_PROGRESS;
                 }
                 break;
@@ -383,11 +437,15 @@ var GameManager = /** @class */ (function () {
                     // Check which slot has the winner
                     if (!this.slotA.isEmpty()) {
                         // Winner in A, fill B
-                        this.slotB.setTeam(getTeamFromQueue(this));
+                        var newTeam = getTeamFromQueue(this);
+                        newTeam.currentStreak = 0;
+                        this.slotB.setTeam(newTeam);
                     }
                     else {
                         // Winner in B, fill A
-                        this.slotA.setTeam(getTeamFromQueue(this));
+                        var newTeam = getTeamFromQueue(this);
+                        newTeam.currentStreak = 0;
+                        this.slotA.setTeam(newTeam);
                     }
                     this.currentState = GameState.MATCH_IN_PROGRESS;
                 }

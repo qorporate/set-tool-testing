@@ -33,8 +33,15 @@
                             <em><span id="team1-stats"></span></em>
                         </p>
                         <p class="streak">
-                            Current Streak: <span id="team1-streak">0</span>
+                            Streak: <span id="team1-streak">0</span>
                         </p>
+                        <button
+                            id="team1-swap-button"
+                            class="swap-button"
+                            onclick="game.swapTeamInMatch('A')"
+                        >
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
                     </div>
                     <div class="vs">VS</div>
                     <div class="team" id="team2">
@@ -43,8 +50,15 @@
                             <em><span id="team2-stats"></span></em>
                         </p>
                         <p class="streak">
-                            Current Streak: <span id="team2-streak">0</span>
+                            Streak: <span id="team2-streak">0</span>
                         </p>
+                        <button
+                            id="team2-swap-button"
+                            class="swap-button"
+                            onclick="game.swapTeamInMatch('B')"
+                        >
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
                     </div>
                 </div>
 
