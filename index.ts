@@ -557,7 +557,7 @@ class GameManager {
             } aria-label="Move ${team.name} down">
                     <i class="fas fa-chevron-down"></i>
                 </button>
-                <button class="edit-team" onclick="game.editTeamName('${
+                <button class="edit-team-button match-team-button" onclick="game.editTeamName('${
                     team.name
                 }')" aria-label="Edit ${team.name}">
                     <i class="fas fa-pencil-alt"></i>

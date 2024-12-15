@@ -167,16 +167,21 @@ input[type="text"] {
     background-color: #ccc;
 }
 
-.edit-team {
-    background-color: #2196f3;
-    color: white;
+.match-team-button {
     padding: 5px;
     font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 34px;
     height: 34px;
+}
+
+.edit-team-button {
+    background-color: #2196f3;
+    color: white;
+}
+
+.swap-button {
+    background-color: #ff9800;
+    color: white;
 }
 
 .reset {
@@ -189,12 +194,4 @@ input[type="text"] {
     background-color: red;
     color: white;
     font-weight: bold;
-}
-
-.swap-button {
-    background-color: #ff9800;
-    color: white;
-    padding: 5px 10px;
-    font-size: 14px;
-    margin-top: 10px;
 }
