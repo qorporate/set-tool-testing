@@ -216,7 +216,7 @@ var GameManager = /** @class */ (function () {
             this.showError("No team in slot ".concat(slot, " to swap"));
             return;
         }
-        var newTeam = this.queue.dequeue();
+        var newTeam = this.queue.items[0];
         if (!newTeam) {
             throw new Error("Queue is empty");
         }
@@ -226,7 +226,7 @@ var GameManager = /** @class */ (function () {
         else {
             this.slotB.setTeam(newTeam);
         }
-        this.queue.enqueue(teamToSwap);
+        this.queue.items[0] = teamToSwap;
         this.saveGameState();
         this.updateDisplay();
     };

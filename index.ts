@@ -288,7 +288,7 @@ class GameManager {
             return;
         }
 
-        const newTeam = this.queue.dequeue();
+        const newTeam = this.queue.items[0];
         if (!newTeam) {
             throw new Error("Queue is empty");
         }
@@ -299,8 +299,7 @@ class GameManager {
             this.slotB.setTeam(newTeam);
         }
 
-        this.queue.enqueue(teamToSwap);
-
+        this.queue.items[0] = teamToSwap;
         this.saveGameState();
         this.updateDisplay();
     }
