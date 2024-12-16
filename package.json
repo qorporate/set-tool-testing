@@ -1,15 +1,14 @@
 {
-  "name": "set-tool-official",
-  "version": "1.0.0",
-  "description": "Manage sets when playing sports. Add as many teams as you'd like.",
-  "main": "index.js",
-  "devDependencies": {
-    "typescript": "^5.7.2"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "name": "set-tool-official",
+    "module": "index.ts",
+    "type": "module",
+    "scripts": {
+        "dev": "bun build ./src/index.ts --outfile ./index.js --watch"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    }
 }

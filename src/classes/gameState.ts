@@ -1,0 +1,5 @@
+export class GameState {
+    static WAITING_FOR_TEAMS = "WAITING_FOR_TEAMS";
+    static MATCH_IN_PROGRESS = "MATCH_IN_PROGRESS";
+    static WINNER_NEEDS_CHALLENGER = "WINNER_NEEDS_CHALLENGER";
+}

@@ -1,118 +1,15 @@
-class Queue {
-    items: Team[];
+import { Team } from "./team";
+import { MatchSlot } from "./matchSlot";
+import { Queue } from "./queue";
+import { GameState } from "./gameState";
+import { Slot, State, MatchResult } from "../misc";
 
-    constructor() {
-        this.items = [];
-    }
-
-    enqueue(item: Team) {
-        this.items.push(item);
-    }
-
-    dequeue() {
-        return this.items.shift();
-    }
-
-    peek() {
-        return this.items[0];
-    }
-
-    isEmpty() {
-        return this.items.length === 0;
-    }
-
-    size() {
-        return this.items.length;
-    }
-
-    remove(teamName: string) {
-        this.items = this.items.filter((team) => team.name !== teamName);
-    }
-
-    moveUp(teamName: string) {
-        const index = this.items.findIndex((team) => team.name === teamName);
-        if (index > 0) {
-            const temp = this.items[index];
-            this.items[index] = this.items[index - 1];
-            this.items[index - 1] = temp;
-        }
-    }
-
-    moveDown(teamName: string) {
-        const index = this.items.findIndex((team) => team.name === teamName);
-        if (index < this.items.length - 1) {
-            const temp = this.items[index];
-            this.items[index] = this.items[index + 1];
-            this.items[index + 1] = temp;
-        }
-    }
-}
-
-class Team {
-    name: string;
-    wins: number;
-    draws: number;
-    losses: number;
-    currentStreak: number;
-
-    constructor(name: string) {
-        this.name = name;
-        this.wins = 0;
-        this.draws = 0;
-        this.losses = 0;
-        this.currentStreak = 0;
-    }
-}
-
-class GameState {
-    static WAITING_FOR_TEAMS = "WAITING_FOR_TEAMS";
-    static MATCH_IN_PROGRESS = "MATCH_IN_PROGRESS";
-    static WINNER_NEEDS_CHALLENGER = "WINNER_NEEDS_CHALLENGER";
-}
-
-type Slot = "A" | "B";
-
-interface State {
-    queueItems: Team[];
-    teamInMatchA: Team | null;
-    teamInMatchB: Team | null;
-    currentState: GameState;
-}
-
-enum MatchResult {
-    Team1 = "team1",
-    Team2 = "team2",
-    Draw = "draw",
-}
-
-class MatchSlot {
-    position: Slot;
-    team: Team | null;
-
-    constructor(position: Slot) {
-        this.position = position; // 'A' or 'B'
-        this.team = null;
-    }
-
-    setTeam(team: Team) {
-        this.team = team;
-    }
-
-    clear() {
-        this.team = null;
-    }
-
-    isEmpty() {
-        return this.team === null;
-    }
-}
-
-class GameManager {
+export class GameManager {
     slotA: MatchSlot;
     slotB: MatchSlot;
     queue: Queue;
     currentState: GameState;
-    errorTimeout: number | null;
+    errorTimeout: Timer | null;
 
     constructor() {
         this.slotA = new MatchSlot("A");
@@ -647,5 +544,3 @@ class GameManager {
         });
     }
 }
-
-const game = new GameManager();
