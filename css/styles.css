@@ -179,11 +179,6 @@ input[type="text"] {
     color: white;
 }
 
-.swap-button {
-    background-color: #ff9800;
-    color: white;
-}
-
 .reset {
     display: flex;
     justify-content: center;
@@ -191,7 +186,7 @@ input[type="text"] {
 }
 
 .reset button {
-    background-color: red;
+    background-color: #f44336;
     color: white;
     font-weight: bold;
 }
