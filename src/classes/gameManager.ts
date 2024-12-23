@@ -2,7 +2,7 @@ import { Team } from "./team";
 import { MatchSlot } from "./matchSlot";
 import { Queue } from "./queue";
 import { GameState } from "./gameState";
-import { Slot, State, MatchResult } from "../misc";
+import { Slot, State, MatchResult, defaultState } from "../misc";
 
 export class GameManager {
     slotA: MatchSlot;
@@ -10,6 +10,8 @@ export class GameManager {
     queue: Queue;
     currentState: GameState;
     errorTimeout: Timer | null;
+    undoStack: State[];
+    redoStack: State[];
 
     constructor() {
         this.slotA = new MatchSlot("A");
@@ -17,10 +19,52 @@ export class GameManager {
         this.queue = new Queue();
         this.errorTimeout = null;
         this.currentState = GameState.WAITING_FOR_TEAMS;
+        this.undoStack = [this.captureCurrentState()];
+        this.redoStack = [];
 
         this.initializeEventListeners();
         this.loadGameState();
         this.updateDisplay();
+    }
+
+    undo() {
+        // the default state doesn't count as an 'undoable' action
+        if (this.undoStack.length <= 1) {
+            console.log("There are no actions to undo.");
+            return;
+        }
+
+        // Save the current state to the redo stack
+        const currentState = this.captureCurrentState();
+        this.redoStack.push(currentState);
+
+        // Pop the last state and restore the previous one
+        this.undoStack.pop();
+        const previousState = this.undoStack[this.undoStack.length - 1];
+        if (!previousState) {
+            throw new Error("Failed to undo. No previous state found.");
+        }
+
+        this.restoreState(previousState);
+    }
+
+    redo() {
+        if (this.redoStack.length === 0) {
+            console.log("There are no actions to redo.");
+            return;
+        }
+
+        // Save the current state to the undo stack
+        const currentState = this.captureCurrentState();
+        this.undoStack.push(currentState);
+
+        // Pop the last state from the redo stack and restore it
+        const nextState = this.redoStack.pop();
+        if (!nextState) {
+            throw new Error("Failed to redo. No next state found.");
+        }
+
+        this.restoreState(nextState);
     }
 
     showError(message: string) {
@@ -116,14 +160,29 @@ export class GameManager {
     }
 
     saveGameState() {
-        const state: State = {
-            queueItems: this.queue.items,
+        const state: State = this.captureCurrentState();
+        localStorage.setItem("gameState", JSON.stringify(state));
+
+        this.undoStack.push(state);
+        // when a new action is performed, the undo stack is invalidated
+        this.redoStack = [];
+    }
+
+    private captureCurrentState(): State {
+        return {
+            queueItems: [...this.queue.items],
             teamInMatchA: this.slotA.team,
             teamInMatchB: this.slotB.team,
             currentState: this.currentState,
         };
+    }
 
-        localStorage.setItem("gameState", JSON.stringify(state));
+    private restoreState(state: State) {
+        this.queue.items = [...state.queueItems];
+        this.slotA.team = state.teamInMatchA;
+        this.slotB.team = state.teamInMatchB;
+        this.currentState = state.currentState;
+        this.updateDisplay();
     }
 
     resetGame() {
@@ -301,6 +360,26 @@ export class GameManager {
         }
     }
 
+    private updateUndoRedoButtons() {
+        const undoButton = document.getElementById(
+            "undo-button"
+        ) as HTMLInputElement;
+        if (!undoButton) {
+            throw new Error("Uh oh! No swap button for team 1.");
+        }
+
+        const redoButton = document.getElementById(
+            "redo-button"
+        ) as HTMLInputElement;
+        if (!redoButton) {
+            throw new Error("Uh oh! No swap button for team 2.");
+        }
+
+        // the initial game state doesn't count as 'undoable'
+        undoButton.disabled = this.undoStack.length <= 1;
+        redoButton.disabled = this.redoStack.length === 0;
+    }
+
     updateDisplay() {
         const matchDisplay = document.getElementById("match-display");
         if (!matchDisplay) {
@@ -393,6 +472,7 @@ export class GameManager {
         // Update button state
         this.updateDrawButton();
         this.updateSwapButton();
+        this.updateUndoRedoButtons();
 
         // todo: move to util section
         function getElementById(id: string): HTMLElement | HTMLInputElement {

@@ -89,15 +89,46 @@ class GameManager {
   queue;
   currentState;
   errorTimeout;
+  undoStack;
+  redoStack;
   constructor() {
     this.slotA = new MatchSlot("A");
     this.slotB = new MatchSlot("B");
     this.queue = new Queue;
     this.errorTimeout = null;
     this.currentState = GameState.WAITING_FOR_TEAMS;
+    this.undoStack = [this.captureCurrentState()];
+    this.redoStack = [];
     this.initializeEventListeners();
     this.loadGameState();
     this.updateDisplay();
+  }
+  undo() {
+    if (this.undoStack.length <= 1) {
+      console.log("There are no actions to undo.");
+      return;
+    }
+    const currentState = this.captureCurrentState();
+    this.redoStack.push(currentState);
+    this.undoStack.pop();
+    const previousState = this.undoStack[this.undoStack.length - 1];
+    if (!previousState) {
+      throw new Error("Failed to undo. No previous state found.");
+    }
+    this.restoreState(previousState);
+  }
+  redo() {
+    if (this.redoStack.length === 0) {
+      console.log("There are no actions to redo.");
+      return;
+    }
+    const currentState = this.captureCurrentState();
+    this.undoStack.push(currentState);
+    const nextState = this.redoStack.pop();
+    if (!nextState) {
+      throw new Error("Failed to redo. No next state found.");
+    }
+    this.restoreState(nextState);
   }
   showError(message) {
     const errorDiv = document.getElementById("error-message");
@@ -167,13 +198,25 @@ class GameManager {
     }
   }
   saveGameState() {
-    const state = {
-      queueItems: this.queue.items,
+    const state = this.captureCurrentState();
+    localStorage.setItem("gameState", JSON.stringify(state));
+    this.undoStack.push(state);
+    this.redoStack = [];
+  }
+  captureCurrentState() {
+    return {
+      queueItems: [...this.queue.items],
       teamInMatchA: this.slotA.team,
       teamInMatchB: this.slotB.team,
       currentState: this.currentState
     };
-    localStorage.setItem("gameState", JSON.stringify(state));
+  }
+  restoreState(state) {
+    this.queue.items = [...state.queueItems];
+    this.slotA.team = state.teamInMatchA;
+    this.slotB.team = state.teamInMatchB;
+    this.currentState = state.currentState;
+    this.updateDisplay();
   }
   resetGame() {
     const confirmation = confirm("Are you sure you want to reset the game? This action is unrecoverable.");
@@ -299,6 +342,18 @@ class GameManager {
       team2SwapButton.disabled = false;
     }
   }
+  updateUndoRedoButtons() {
+    const undoButton = document.getElementById("undo-button");
+    if (!undoButton) {
+      throw new Error("Uh oh! No swap button for team 1.");
+    }
+    const redoButton = document.getElementById("redo-button");
+    if (!redoButton) {
+      throw new Error("Uh oh! No swap button for team 2.");
+    }
+    undoButton.disabled = this.undoStack.length <= 1;
+    redoButton.disabled = this.redoStack.length === 0;
+  }
   updateDisplay() {
     const matchDisplay = document.getElementById("match-display");
     if (!matchDisplay) {
@@ -354,6 +409,7 @@ class GameManager {
     this.updateQueueDisplay();
     this.updateDrawButton();
     this.updateSwapButton();
+    this.updateUndoRedoButtons();
     function getElementById(id) {
       const element = document.getElementById(id);
       if (!element) {

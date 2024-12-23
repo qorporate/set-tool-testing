@@ -197,8 +197,8 @@ input[type="text"] {
     margin-top: 10px;
 }
 
-.undo-button,
-.redo-button {
+#undo-button,
+#redo-button {
     padding: 10px 20px;
     margin: 0 5px;
     border: none;
@@ -207,24 +207,24 @@ input[type="text"] {
     transition: background-color 0.3s;
 }
 
-.undo-button {
+#undo-button {
     background-color: #aad03d;
 }
 
-.undo-button:hover {
+#undo-button:hover {
     background-color: #a9d03d9a;
 }
 
-.redo-button {
+#redo-button {
     background-color: #e27dc7;
 }
 
-.redo-button:hover {
+#redo-button:hover {
     background-color: #e27dc788;
 }
 
-.undo-button:disabled,
-.redo-button:disabled {
+#undo-button:disabled,
+#redo-button:disabled {
     background-color: #f0f0f0;
     opacity: 0.5;
     cursor: not-allowed;
