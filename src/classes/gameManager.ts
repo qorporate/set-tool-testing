@@ -322,6 +322,8 @@ export class GameManager {
 
         // we don't save state here, because the next method alters the state again
         this.setupNextMatch();
+        this.saveGameState();
+        this.updateDisplay();
     }
 
     private updateDrawButton() {
@@ -597,9 +599,6 @@ export class GameManager {
                 }
                 break;
         }
-
-        this.saveGameState();
-        this.updateDisplay();
 
         function getTeamFromQueue(gameManager: GameManager): Team {
             const team = gameManager.queue.dequeue();

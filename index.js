@@ -317,6 +317,8 @@ class GameManager {
       this.currentState = GameState.WAITING_FOR_TEAMS;
     }
     this.setupNextMatch();
+    this.saveGameState();
+    this.updateDisplay();
   }
   updateDrawButton() {
     const drawButton = document.getElementById("draw-button");
@@ -490,8 +492,6 @@ class GameManager {
         }
         break;
     }
-    this.saveGameState();
-    this.updateDisplay();
     function getTeamFromQueue(gameManager) {
       const team = gameManager.queue.dequeue();
       if (team) {
