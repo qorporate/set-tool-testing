@@ -164,7 +164,7 @@ export class GameManager {
         localStorage.setItem("gameState", JSON.stringify(state));
 
         this.undoStack.push(state);
-        // when a new action is performed, the undo stack is invalidated
+        // when a new action is performed, the redo stack is invalidated
         this.redoStack = [];
     }
 
