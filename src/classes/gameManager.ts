@@ -34,17 +34,12 @@ export class GameManager {
             return;
         }
 
-        // Save the current state to the redo stack
-        const currentState = this.captureCurrentState();
-        this.redoStack.push(currentState);
+        // Just move the current state from undo to redo
+        const stateToRedo = this.undoStack.pop()!; // We know it exists because of length check
+        this.redoStack.push(stateToRedo);
 
-        // Pop the last state and restore the previous one
-        this.undoStack.pop();
+        // Restore the previous state
         const previousState = this.undoStack[this.undoStack.length - 1];
-        if (!previousState) {
-            throw new Error("Failed to undo. No previous state found.");
-        }
-
         this.restoreState(previousState);
     }
 
@@ -53,6 +48,12 @@ export class GameManager {
             console.log("There are no actions to redo.");
             return;
         }
+
+        // Move state from redo to undo
+        const stateToUndo = this.redoStack.pop()!; // We know it exists because of length check
+        this.undoStack.push(stateToUndo);
+        this.restoreState(stateToUndo);
+    }
 
     private deepCopyTeam(team: Team | null): Team | null {
         if (!team) return null;

@@ -108,16 +108,19 @@ class GameManager {
       console.log("There are no actions to undo.");
       return;
     }
-    const currentState = this.captureCurrentState();
-    this.redoStack.push(currentState);
-    this.undoStack.pop();
+    const stateToRedo = this.undoStack.pop();
+    this.redoStack.push(stateToRedo);
     const previousState = this.undoStack[this.undoStack.length - 1];
-    if (!previousState) {
-      throw new Error("Failed to undo. No previous state found.");
-    }
     this.restoreState(previousState);
   }
   redo() {
+    if (this.redoStack.length === 0) {
+      console.log("There are no actions to redo.");
+      return;
+    }
+    const stateToUndo = this.redoStack.pop();
+    this.undoStack.push(stateToUndo);
+    this.restoreState(stateToUndo);
   }
   deepCopyTeam(team) {
     if (!team)
