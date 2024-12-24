@@ -34,17 +34,12 @@ export class GameManager {
             return;
         }
 
-        // Save the current state to the redo stack
-        const currentState = this.captureCurrentState();
-        this.redoStack.push(currentState);
+        // Just move the current state from undo to redo
+        const stateToRedo = this.undoStack.pop()!; // We know it exists because of length check
+        this.redoStack.push(stateToRedo);
 
-        // Pop the last state and restore the previous one
-        this.undoStack.pop();
+        // Restore the previous state
         const previousState = this.undoStack[this.undoStack.length - 1];
-        if (!previousState) {
-            throw new Error("Failed to undo. No previous state found.");
-        }
-
         this.restoreState(previousState);
     }
 
@@ -54,17 +49,21 @@ export class GameManager {
             return;
         }
 
-        // Save the current state to the undo stack
-        const currentState = this.captureCurrentState();
-        this.undoStack.push(currentState);
+        // Move state from redo to undo
+        const stateToUndo = this.redoStack.pop()!; // We know it exists because of length check
+        this.undoStack.push(stateToUndo);
+        this.restoreState(stateToUndo);
+    }
 
-        // Pop the last state from the redo stack and restore it
-        const nextState = this.redoStack.pop();
-        if (!nextState) {
-            throw new Error("Failed to redo. No next state found.");
-        }
-
-        this.restoreState(nextState);
+    private deepCopyTeam(team: Team | null): Team | null {
+        if (!team) return null;
+        return {
+            name: team.name,
+            wins: team.wins,
+            losses: team.losses,
+            draws: team.draws,
+            currentStreak: team.currentStreak,
+        };
     }
 
     showError(message: string) {
@@ -115,6 +114,7 @@ export class GameManager {
         }
 
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -131,18 +131,21 @@ export class GameManager {
 
         this.queue.remove(teamName);
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
     moveTeamUp(teamName: string) {
         this.queue.moveUp(teamName);
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
     moveTeamDown(teamName: string) {
         this.queue.moveDown(teamName);
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -162,26 +165,34 @@ export class GameManager {
     saveGameState() {
         const state: State = this.captureCurrentState();
         localStorage.setItem("gameState", JSON.stringify(state));
+    }
 
+    private updateUndoStack(state: State) {
         this.undoStack.push(state);
-        // when a new action is performed, the undo stack is invalidated
+        // when a new action is performed, the redo stack is invalidated
         this.redoStack = [];
     }
 
     private captureCurrentState(): State {
         return {
-            queueItems: [...this.queue.items],
-            teamInMatchA: this.slotA.team,
-            teamInMatchB: this.slotB.team,
+            queueItems: this.queue.items.map(
+                (team) => this.deepCopyTeam(team)!
+            ),
+            teamInMatchA: this.deepCopyTeam(this.slotA.team),
+            teamInMatchB: this.deepCopyTeam(this.slotB.team),
             currentState: this.currentState,
         };
     }
 
     private restoreState(state: State) {
-        this.queue.items = [...state.queueItems];
-        this.slotA.team = state.teamInMatchA;
-        this.slotB.team = state.teamInMatchB;
+        this.queue.items = state.queueItems.map(
+            (team) => this.deepCopyTeam(team)!
+        );
+        this.slotA.team = this.deepCopyTeam(state.teamInMatchA);
+        this.slotB.team = this.deepCopyTeam(state.teamInMatchB);
         this.currentState = state.currentState;
+
+        this.saveGameState();
         this.updateDisplay();
     }
 
@@ -229,6 +240,7 @@ export class GameManager {
         }
 
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -257,6 +269,7 @@ export class GameManager {
 
         this.queue.items[0] = teamToSwap;
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -320,9 +333,9 @@ export class GameManager {
             this.currentState = GameState.WAITING_FOR_TEAMS;
         }
 
-        // we don't save state here, because the next method alters the state again
         this.setupNextMatch();
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
