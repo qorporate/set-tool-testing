@@ -453,7 +453,7 @@ class GameManager {
       const li = document.createElement("li");
       li.className = "queue-item";
       li.innerHTML = `
-            <span><b>${team.name}</b> - <em>${this.formatTeamStats(team)}</em></span>
+            <span><b>${team.name}</b><br/><em>${this.formatTeamStats(team)}</em></span>
             <div class="queue-item-buttons">
                 <button class="move-button" onclick="game.moveTeamUp('${team.name}')" ${index === 0 ? "disabled" : ""} aria-label="Move ${team.name} up">
                     <i class="fas fa-chevron-up"></i>

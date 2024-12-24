@@ -530,7 +530,7 @@ export class GameManager {
             const li = document.createElement("li");
             li.className = "queue-item";
             li.innerHTML = `
-            <span><b>${team.name}</b> - <em>${this.formatTeamStats(
+            <span><b>${team.name}</b><br/><em>${this.formatTeamStats(
                 team
             )}</em></span>
             <div class="queue-item-buttons">

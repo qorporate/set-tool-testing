@@ -1,9 +1,31 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 body {
     font-family: Arial, sans-serif;
     max-width: 800px;
     margin: 20px auto;
     padding: 20px;
     background-color: #f0f0f0;
+}
+
+h1 {
+    font-size: 1.9rem;
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 8px 0;
+}
+
+em {
+    font-style: italic;
+    font-weight: bold;
 }
 
 .container {
@@ -19,23 +41,39 @@ body {
 
 .current-match {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
+
     margin: 20px 0;
     padding: 20px;
+
     background-color: #f8f8f8;
     border-radius: 8px;
+    width: 100%;
 }
 
 .team {
-    flex: 1;
     text-align: center;
+}
+
+.team h2 {
+    font-size: 1rem;
+}
+
+.team .stats {
+    font-size: 0.8rem;
+}
+
+.streak {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 5px;
 }
 
 .vs {
     margin: 0 20px;
     font-weight: bold;
-    font-size: 24px;
+    font-size: 1.5rem;
 }
 
 .buttons {
@@ -94,10 +132,13 @@ button:hover:not(:disabled) {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    font-size: 0.95rem;
 }
 
 .team-management {
     border-top: 1px solid #ddd;
+    padding-top: 10px;
 }
 
 .team-input {
@@ -137,12 +178,6 @@ input[type="text"] {
     color: #f44336;
     margin-top: 5px;
     font-size: 14px;
-}
-
-.streak {
-    font-size: 14px;
-    color: #666;
-    margin-top: 5px;
 }
 
 .waiting-count {
