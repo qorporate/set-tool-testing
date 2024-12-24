@@ -118,17 +118,17 @@ class GameManager {
     this.restoreState(previousState);
   }
   redo() {
-    if (this.redoStack.length === 0) {
-      console.log("There are no actions to redo.");
-      return;
-    }
-    const currentState = this.captureCurrentState();
-    this.undoStack.push(currentState);
-    const nextState = this.redoStack.pop();
-    if (!nextState) {
-      throw new Error("Failed to redo. No next state found.");
-    }
-    this.restoreState(nextState);
+  }
+  deepCopyTeam(team) {
+    if (!team)
+      return null;
+    return {
+      name: team.name,
+      wins: team.wins,
+      losses: team.losses,
+      draws: team.draws,
+      currentStreak: team.currentStreak
+    };
   }
   showError(message) {
     const errorDiv = document.getElementById("error-message");
@@ -211,16 +211,16 @@ class GameManager {
   }
   captureCurrentState() {
     return {
-      queueItems: [...this.queue.items],
-      teamInMatchA: this.slotA.team,
-      teamInMatchB: this.slotB.team,
+      queueItems: this.queue.items.map((team) => this.deepCopyTeam(team)),
+      teamInMatchA: this.deepCopyTeam(this.slotA.team),
+      teamInMatchB: this.deepCopyTeam(this.slotB.team),
       currentState: this.currentState
     };
   }
   restoreState(state) {
-    this.queue.items = [...state.queueItems];
-    this.slotA.team = state.teamInMatchA;
-    this.slotB.team = state.teamInMatchB;
+    this.queue.items = state.queueItems.map((team) => this.deepCopyTeam(team));
+    this.slotA.team = this.deepCopyTeam(state.teamInMatchA);
+    this.slotB.team = this.deepCopyTeam(state.teamInMatchB);
     this.currentState = state.currentState;
     this.saveGameState();
     this.updateDisplay();
