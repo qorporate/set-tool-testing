@@ -25,6 +25,25 @@
         <div class="container">
             <h1>QSet</h1>
 
+            <div class="undo-redo-buttons">
+                <button
+                    id="undo-button"
+                    onclick="game.undo()"
+                    aria-label="Undo"
+                    disabled
+                >
+                    <i class="fas fa-undo"></i> Undo
+                </button>
+                <button
+                    id="redo-button"
+                    onclick="game.redo()"
+                    aria-label="Redo"
+                    disabled
+                >
+                    <i class="fas fa-redo"></i> Redo
+                </button>
+            </div>
+
             <div id="match-display">
                 <div class="current-match" id="current-match">
                     <div class="team" id="team1">
@@ -117,6 +136,7 @@
                 </div>
                 <div id="error-message" class="error-message"></div>
             </div>
+
             <div class="reset">
                 <button class="reset-game" onclick="game.resetGame()">
                     Reset Game

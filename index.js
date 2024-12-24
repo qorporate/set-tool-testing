@@ -89,15 +89,49 @@ class GameManager {
   queue;
   currentState;
   errorTimeout;
+  undoStack;
+  redoStack;
   constructor() {
     this.slotA = new MatchSlot("A");
     this.slotB = new MatchSlot("B");
     this.queue = new Queue;
     this.errorTimeout = null;
     this.currentState = GameState.WAITING_FOR_TEAMS;
+    this.undoStack = [this.captureCurrentState()];
+    this.redoStack = [];
     this.initializeEventListeners();
     this.loadGameState();
     this.updateDisplay();
+  }
+  undo() {
+    if (this.undoStack.length <= 1) {
+      console.log("There are no actions to undo.");
+      return;
+    }
+    const stateToRedo = this.undoStack.pop();
+    this.redoStack.push(stateToRedo);
+    const previousState = this.undoStack[this.undoStack.length - 1];
+    this.restoreState(previousState);
+  }
+  redo() {
+    if (this.redoStack.length === 0) {
+      console.log("There are no actions to redo.");
+      return;
+    }
+    const stateToUndo = this.redoStack.pop();
+    this.undoStack.push(stateToUndo);
+    this.restoreState(stateToUndo);
+  }
+  deepCopyTeam(team) {
+    if (!team)
+      return null;
+    return {
+      name: team.name,
+      wins: team.wins,
+      losses: team.losses,
+      draws: team.draws,
+      currentStreak: team.currentStreak
+    };
   }
   showError(message) {
     const errorDiv = document.getElementById("error-message");
@@ -133,6 +167,7 @@ class GameManager {
       this.setupNextMatch();
     }
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   removeTeam(teamName) {
@@ -143,16 +178,19 @@ class GameManager {
     }
     this.queue.remove(teamName);
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   moveTeamUp(teamName) {
     this.queue.moveUp(teamName);
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   moveTeamDown(teamName) {
     this.queue.moveDown(teamName);
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   loadGameState() {
@@ -167,13 +205,28 @@ class GameManager {
     }
   }
   saveGameState() {
-    const state = {
-      queueItems: this.queue.items,
-      teamInMatchA: this.slotA.team,
-      teamInMatchB: this.slotB.team,
+    const state = this.captureCurrentState();
+    localStorage.setItem("gameState", JSON.stringify(state));
+  }
+  updateUndoStack(state) {
+    this.undoStack.push(state);
+    this.redoStack = [];
+  }
+  captureCurrentState() {
+    return {
+      queueItems: this.queue.items.map((team) => this.deepCopyTeam(team)),
+      teamInMatchA: this.deepCopyTeam(this.slotA.team),
+      teamInMatchB: this.deepCopyTeam(this.slotB.team),
       currentState: this.currentState
     };
-    localStorage.setItem("gameState", JSON.stringify(state));
+  }
+  restoreState(state) {
+    this.queue.items = state.queueItems.map((team) => this.deepCopyTeam(team));
+    this.slotA.team = this.deepCopyTeam(state.teamInMatchA);
+    this.slotB.team = this.deepCopyTeam(state.teamInMatchB);
+    this.currentState = state.currentState;
+    this.saveGameState();
+    this.updateDisplay();
   }
   resetGame() {
     const confirmation = confirm("Are you sure you want to reset the game? This action is unrecoverable.");
@@ -202,6 +255,7 @@ class GameManager {
       this.slotB.team.name = newName;
     }
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   swapTeamInMatch(slot) {
@@ -225,6 +279,7 @@ class GameManager {
     }
     this.queue.items[0] = teamToSwap;
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   handleResult(result) {
@@ -274,6 +329,9 @@ class GameManager {
       this.currentState = GameState.WAITING_FOR_TEAMS;
     }
     this.setupNextMatch();
+    this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
+    this.updateDisplay();
   }
   updateDrawButton() {
     const drawButton = document.getElementById("draw-button");
@@ -298,6 +356,18 @@ class GameManager {
       team1SwapButton.disabled = false;
       team2SwapButton.disabled = false;
     }
+  }
+  updateUndoRedoButtons() {
+    const undoButton = document.getElementById("undo-button");
+    if (!undoButton) {
+      throw new Error("Uh oh! No swap button for team 1.");
+    }
+    const redoButton = document.getElementById("redo-button");
+    if (!redoButton) {
+      throw new Error("Uh oh! No swap button for team 2.");
+    }
+    undoButton.disabled = this.undoStack.length <= 1;
+    redoButton.disabled = this.redoStack.length === 0;
   }
   updateDisplay() {
     const matchDisplay = document.getElementById("match-display");
@@ -354,6 +424,7 @@ class GameManager {
     this.updateQueueDisplay();
     this.updateDrawButton();
     this.updateSwapButton();
+    this.updateUndoRedoButtons();
     function getElementById(id) {
       const element = document.getElementById(id);
       if (!element) {
@@ -434,8 +505,6 @@ class GameManager {
         }
         break;
     }
-    this.saveGameState();
-    this.updateDisplay();
     function getTeamFromQueue(gameManager) {
       const team = gameManager.queue.dequeue();
       if (team) {

@@ -2,7 +2,7 @@ import { Team } from "./team";
 import { MatchSlot } from "./matchSlot";
 import { Queue } from "./queue";
 import { GameState } from "./gameState";
-import { Slot, State, MatchResult } from "../misc";
+import { Slot, State, MatchResult, defaultState } from "../misc";
 
 export class GameManager {
     slotA: MatchSlot;
@@ -10,6 +10,8 @@ export class GameManager {
     queue: Queue;
     currentState: GameState;
     errorTimeout: Timer | null;
+    undoStack: State[];
+    redoStack: State[];
 
     constructor() {
         this.slotA = new MatchSlot("A");
@@ -17,10 +19,51 @@ export class GameManager {
         this.queue = new Queue();
         this.errorTimeout = null;
         this.currentState = GameState.WAITING_FOR_TEAMS;
+        this.undoStack = [this.captureCurrentState()];
+        this.redoStack = [];
 
         this.initializeEventListeners();
         this.loadGameState();
         this.updateDisplay();
+    }
+
+    undo() {
+        // the default state doesn't count as an 'undoable' action
+        if (this.undoStack.length <= 1) {
+            console.log("There are no actions to undo.");
+            return;
+        }
+
+        // Just move the current state from undo to redo
+        const stateToRedo = this.undoStack.pop()!; // We know it exists because of length check
+        this.redoStack.push(stateToRedo);
+
+        // Restore the previous state
+        const previousState = this.undoStack[this.undoStack.length - 1];
+        this.restoreState(previousState);
+    }
+
+    redo() {
+        if (this.redoStack.length === 0) {
+            console.log("There are no actions to redo.");
+            return;
+        }
+
+        // Move state from redo to undo
+        const stateToUndo = this.redoStack.pop()!; // We know it exists because of length check
+        this.undoStack.push(stateToUndo);
+        this.restoreState(stateToUndo);
+    }
+
+    private deepCopyTeam(team: Team | null): Team | null {
+        if (!team) return null;
+        return {
+            name: team.name,
+            wins: team.wins,
+            losses: team.losses,
+            draws: team.draws,
+            currentStreak: team.currentStreak,
+        };
     }
 
     showError(message: string) {
@@ -71,6 +114,7 @@ export class GameManager {
         }
 
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -87,18 +131,21 @@ export class GameManager {
 
         this.queue.remove(teamName);
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
     moveTeamUp(teamName: string) {
         this.queue.moveUp(teamName);
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
     moveTeamDown(teamName: string) {
         this.queue.moveDown(teamName);
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -116,14 +163,37 @@ export class GameManager {
     }
 
     saveGameState() {
-        const state: State = {
-            queueItems: this.queue.items,
-            teamInMatchA: this.slotA.team,
-            teamInMatchB: this.slotB.team,
+        const state: State = this.captureCurrentState();
+        localStorage.setItem("gameState", JSON.stringify(state));
+    }
+
+    private updateUndoStack(state: State) {
+        this.undoStack.push(state);
+        // when a new action is performed, the redo stack is invalidated
+        this.redoStack = [];
+    }
+
+    private captureCurrentState(): State {
+        return {
+            queueItems: this.queue.items.map(
+                (team) => this.deepCopyTeam(team)!
+            ),
+            teamInMatchA: this.deepCopyTeam(this.slotA.team),
+            teamInMatchB: this.deepCopyTeam(this.slotB.team),
             currentState: this.currentState,
         };
+    }
 
-        localStorage.setItem("gameState", JSON.stringify(state));
+    private restoreState(state: State) {
+        this.queue.items = state.queueItems.map(
+            (team) => this.deepCopyTeam(team)!
+        );
+        this.slotA.team = this.deepCopyTeam(state.teamInMatchA);
+        this.slotB.team = this.deepCopyTeam(state.teamInMatchB);
+        this.currentState = state.currentState;
+
+        this.saveGameState();
+        this.updateDisplay();
     }
 
     resetGame() {
@@ -170,6 +240,7 @@ export class GameManager {
         }
 
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -198,6 +269,7 @@ export class GameManager {
 
         this.queue.items[0] = teamToSwap;
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -261,8 +333,10 @@ export class GameManager {
             this.currentState = GameState.WAITING_FOR_TEAMS;
         }
 
-        // we don't save state here, because the next method alters the state again
         this.setupNextMatch();
+        this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
+        this.updateDisplay();
     }
 
     private updateDrawButton() {
@@ -299,6 +373,26 @@ export class GameManager {
             team1SwapButton.disabled = false;
             team2SwapButton.disabled = false;
         }
+    }
+
+    private updateUndoRedoButtons() {
+        const undoButton = document.getElementById(
+            "undo-button"
+        ) as HTMLInputElement;
+        if (!undoButton) {
+            throw new Error("Uh oh! No swap button for team 1.");
+        }
+
+        const redoButton = document.getElementById(
+            "redo-button"
+        ) as HTMLInputElement;
+        if (!redoButton) {
+            throw new Error("Uh oh! No swap button for team 2.");
+        }
+
+        // the initial game state doesn't count as 'undoable'
+        undoButton.disabled = this.undoStack.length <= 1;
+        redoButton.disabled = this.redoStack.length === 0;
     }
 
     updateDisplay() {
@@ -393,6 +487,7 @@ export class GameManager {
         // Update button state
         this.updateDrawButton();
         this.updateSwapButton();
+        this.updateUndoRedoButtons();
 
         // todo: move to util section
         function getElementById(id: string): HTMLElement | HTMLInputElement {
@@ -517,9 +612,6 @@ export class GameManager {
                 }
                 break;
         }
-
-        this.saveGameState();
-        this.updateDisplay();
 
         function getTeamFromQueue(gameManager: GameManager): Team {
             const team = gameManager.queue.dequeue();
