@@ -347,8 +347,8 @@ export class GameManager {
             return;
         }
 
-        // Disable draw button if there's only one or no teams waiting
-        drawButton.disabled = this.queue.size() <= 1;
+        // Hide draw button if there's only one or no teams waiting
+        drawButton.hidden = this.queue.size() <= 1;
     }
 
     private updateSwapButton() {

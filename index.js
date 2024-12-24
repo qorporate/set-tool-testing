@@ -338,7 +338,7 @@ class GameManager {
     if (!drawButton) {
       return;
     }
-    drawButton.disabled = this.queue.size() <= 1;
+    drawButton.hidden = this.queue.size() <= 1;
   }
   updateSwapButton() {
     const team1SwapButton = document.getElementById("team1-swap-button");
