@@ -115,6 +115,7 @@ export class GameManager {
         }
 
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -131,18 +132,21 @@ export class GameManager {
 
         this.queue.remove(teamName);
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
     moveTeamUp(teamName: string) {
         this.queue.moveUp(teamName);
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
     moveTeamDown(teamName: string) {
         this.queue.moveDown(teamName);
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -162,7 +166,9 @@ export class GameManager {
     saveGameState() {
         const state: State = this.captureCurrentState();
         localStorage.setItem("gameState", JSON.stringify(state));
+    }
 
+    private updateUndoStack(state: State) {
         this.undoStack.push(state);
         // when a new action is performed, the redo stack is invalidated
         this.redoStack = [];
@@ -182,6 +188,8 @@ export class GameManager {
         this.slotA.team = state.teamInMatchA;
         this.slotB.team = state.teamInMatchB;
         this.currentState = state.currentState;
+
+        this.saveGameState();
         this.updateDisplay();
     }
 
@@ -229,6 +237,7 @@ export class GameManager {
         }
 
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -257,6 +266,7 @@ export class GameManager {
 
         this.queue.items[0] = teamToSwap;
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 
@@ -320,9 +330,9 @@ export class GameManager {
             this.currentState = GameState.WAITING_FOR_TEAMS;
         }
 
-        // we don't save state here, because the next method alters the state again
         this.setupNextMatch();
         this.saveGameState();
+        this.updateUndoStack(this.captureCurrentState());
         this.updateDisplay();
     }
 

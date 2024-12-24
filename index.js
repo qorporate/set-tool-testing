@@ -164,6 +164,7 @@ class GameManager {
       this.setupNextMatch();
     }
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   removeTeam(teamName) {
@@ -174,16 +175,19 @@ class GameManager {
     }
     this.queue.remove(teamName);
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   moveTeamUp(teamName) {
     this.queue.moveUp(teamName);
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   moveTeamDown(teamName) {
     this.queue.moveDown(teamName);
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   loadGameState() {
@@ -200,6 +204,8 @@ class GameManager {
   saveGameState() {
     const state = this.captureCurrentState();
     localStorage.setItem("gameState", JSON.stringify(state));
+  }
+  updateUndoStack(state) {
     this.undoStack.push(state);
     this.redoStack = [];
   }
@@ -216,6 +222,7 @@ class GameManager {
     this.slotA.team = state.teamInMatchA;
     this.slotB.team = state.teamInMatchB;
     this.currentState = state.currentState;
+    this.saveGameState();
     this.updateDisplay();
   }
   resetGame() {
@@ -245,6 +252,7 @@ class GameManager {
       this.slotB.team.name = newName;
     }
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   swapTeamInMatch(slot) {
@@ -268,6 +276,7 @@ class GameManager {
     }
     this.queue.items[0] = teamToSwap;
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   handleResult(result) {
@@ -318,6 +327,7 @@ class GameManager {
     }
     this.setupNextMatch();
     this.saveGameState();
+    this.updateUndoStack(this.captureCurrentState());
     this.updateDisplay();
   }
   updateDrawButton() {
